@@ -279,8 +279,12 @@ final class PagedDataTableController<K extends Comparable<K>, T>
     }
   }
 
-  /// Sets filter [filterId]'s value.
-  void setFilter(String filterId, dynamic value) {
+  /// Sets filter [filterId]'s value and applies all filters if [apply] is true
+  void setFilter(
+    String filterId,
+    dynamic value, {
+    bool apply = true,
+  }) {
     final filterState = _filtersState[filterId];
     if (filterState == null) {
       throw ArgumentError(
@@ -288,7 +292,10 @@ final class PagedDataTableController<K extends Comparable<K>, T>
     }
 
     filterState.value = value;
-    applyFilters();
+
+    if (apply) {
+      applyFilters();
+    }
   }
 
   /// This method automatically calls notifyListeners too.
