@@ -236,7 +236,7 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends ChangeN
   }
 
   /// Removes a filter, changing its value to null.
-  void removeFilter(String filterId) {
+  void removeFilter(String filterId, {bool apply = true}) {
     final filter = _filtersState[filterId];
     if (filter == null) {
       throw ArgumentError("Filter with id $filterId not found.");
@@ -244,16 +244,22 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends ChangeN
 
     filter.value = null;
     notifyListeners();
-    _fetch();
+
+    if (apply) {
+      _fetch();
+    }
   }
 
   /// Removes all the set filters, changing their values to null.
-  void removeFilters() {
+  void removeFilters({bool apply = true}) {
     _filtersState.forEach((key, value) {
       value.value = null;
     });
     notifyListeners();
-    _fetch();
+
+    if (apply) {
+      _fetch();
+    }
   }
 
   /// Applies the current set filters
