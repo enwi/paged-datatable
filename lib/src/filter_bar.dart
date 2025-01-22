@@ -1,17 +1,17 @@
 part of 'paged_datatable.dart';
 
 /// The filter bar is displayed before the table header
-class _FilterBar<K extends Comparable<K>, T> extends StatefulWidget {
+class FilterBar<K extends Comparable<K>, T> extends StatefulWidget {
   final Widget? child;
 
-  const _FilterBar({required this.child});
+  const FilterBar({super.key, required this.child});
 
   @override
   State<StatefulWidget> createState() => _FilterBarState<K, T>();
 }
 
 class _FilterBarState<K extends Comparable<K>, T>
-    extends State<_FilterBar<K, T>> {
+    extends State<FilterBar<K, T>> {
   late final theme = PagedDataTableTheme.of(context);
   late final controller = TableControllerProvider.of<K, T>(context);
 

@@ -150,7 +150,7 @@ final class _PagedDataTableState<K extends Comparable<K>, T>
 
             return Column(
               children: [
-                _FilterBar<K, T>(child: widget.filterBarChild),
+                FilterBar<K, T>(child: widget.filterBarChild),
 
                 _Header(
                   controller: tableController,

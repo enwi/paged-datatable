@@ -7,3 +7,4 @@ export './src/column_format.dart';
 export './src/configuration.dart';
 export './src/footer.dart';
 export './src/theme.dart';
+export './src/table_controller_notifier.dart';
