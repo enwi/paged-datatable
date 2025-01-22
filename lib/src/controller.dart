@@ -32,6 +32,7 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends ChangeN
   SortModel? _currentSortModel; // The current sort model of the table
   TableState _state = TableState.idle;
   TableState get state => _state;
+  FilterModel get filterModel => FilterModel._(_filtersState.map((key, value) => MapEntry(key, value.value)));
 
   /// A flag that indicates if the dataaset has a next page
   bool get hasNextPage => _hasNextPage;
