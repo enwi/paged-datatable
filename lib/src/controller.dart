@@ -30,7 +30,8 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends ChangeN
   int _currentPageIndex = 0; // The current index of the page, used to lookup token inside _paginationKeys
   bool _hasNextPage = false; // a flag that indicates if there are more pages after the current one
   SortModel? _currentSortModel; // The current sort model of the table
-  _TableState _state = _TableState.idle;
+  TableState _state = TableState.idle;
+  TableState get state => _state;
 
   /// A flag that indicates if the dataaset has a next page
   bool get hasNextPage => _hasNextPage;
@@ -272,11 +273,10 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends ChangeN
 
   /// Sets filter [filterId]'s value and applies all filters if [apply] is true
   void addFilter<F extends Object>(
-    String filterId,
     TableFilter<F> filter, {
     bool apply = true,
   }) {
-    _filtersState[filterId] = filter.createState();
+    _filtersState[filter.id] = filter.createState();
 
     if (apply) {
       applyFilters();
@@ -371,7 +371,7 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends ChangeN
   }
 
   Future<void> _fetch([int page = 0]) async {
-    _state = _TableState.fetching;
+    _state = TableState.fetching;
     _selectedRows.clear();
     notifyListeners();
 
@@ -418,13 +418,13 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends ChangeN
       // }
 
       _totalItems = items.length;
-      _state = _TableState.idle;
+      _state = TableState.idle;
       _currentError = null;
       notifyListeners();
     } catch (err, stack) {
       debugPrint("An error occurred trying to fetch a page: $err");
       debugPrint(stack.toString());
-      _state = _TableState.error;
+      _state = TableState.error;
       _currentError = err;
       _totalItems = 0;
       _currentDataset.clear();
@@ -433,7 +433,7 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends ChangeN
   }
 }
 
-enum _TableState {
+enum TableState {
   idle,
   fetching,
   error,
