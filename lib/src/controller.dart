@@ -271,6 +271,19 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends ChangeN
   }
 
   /// Sets filter [filterId]'s value and applies all filters if [apply] is true
+  void addFilter<F extends Object>(
+    String filterId,
+    TableFilter<F> filter, {
+    bool apply = true,
+  }) {
+    _filtersState[filterId] = filter.createState();
+
+    if (apply) {
+      applyFilters();
+    }
+  }
+
+  /// Sets filter [filterId]'s value and applies all filters if [apply] is true
   void setFilter(
     String filterId,
     dynamic value, {
