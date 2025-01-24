@@ -379,6 +379,7 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends ChangeN
     if (_fetcher == null) {
       _state = TableState.idle;
       notifyListeners();
+      return;
     }
 
     try {
