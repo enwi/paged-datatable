@@ -376,6 +376,11 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends ChangeN
     _selectedRows.clear();
     notifyListeners();
 
+    if (_fetcher == null) {
+      _state = TableState.idle;
+      notifyListeners();
+    }
+
     try {
       final pageToken = _paginationKeys[page];
       final filterModel = FilterModel._(_filtersState.map((key, value) => MapEntry(key, value.value)));
