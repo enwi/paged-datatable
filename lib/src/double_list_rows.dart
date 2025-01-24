@@ -43,7 +43,6 @@ class _DoubleListRowsState<K extends Comparable<K>, T> extends State<_DoubleList
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     final theme = PagedDataTableTheme.of(context);
@@ -113,7 +112,7 @@ class _DoubleListRowsState<K extends Comparable<K>, T> extends State<_DoubleList
   void dispose() {
     super.dispose();
 
-    widget.controller.removeListener(_rebuildUi)
+    widget.controller.removeListener(_rebuildUi);
     normalController.dispose();
     fixedController.dispose();
   }
