@@ -14,8 +14,8 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends ChangeN
   final Map<int, K> _paginationKeys = {}; // it's a map because on not found map will return null, list will throw
   final Set<int> _selectedRows = {}; // The list of selected row indexes
   final GlobalKey<FormState> _filtersFormKey = GlobalKey();
-  late final List<int>? _pageSizes;
-  late final Fetcher<K, T> _fetcher; // The function used to fetch items
+  List<int>? _pageSizes;
+  Fetcher<K, T>? _fetcher; // The function used to fetch items
   final Map<_ListenerType, dynamic> _listeners = {
     // The list of special listeners which all are functions
 
@@ -342,7 +342,7 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends ChangeN
   }
 
   /// Initializes the controller filling up properties
-  void _init({
+  void init({
     required List<ReadOnlyTableColumn> columns,
     required List<int>? pageSizes,
     required int initialPageSize,
@@ -380,7 +380,9 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends ChangeN
       final pageToken = _paginationKeys[page];
       final filterModel = FilterModel._(_filtersState.map((key, value) => MapEntry(key, value.value)));
 
-      var (items, nextPageToken) = await _fetcher(_currentPageSize, sortModel, filterModel, pageToken);
+      var (items, nextPageToken) =
+          await _fetcher?.call(_currentPageSize, sortModel, filterModel, pageToken) ?? (<T>[], null);
+
       _hasNextPage = nextPageToken != null;
       _currentPageIndex = page;
       if (nextPageToken != null) {
