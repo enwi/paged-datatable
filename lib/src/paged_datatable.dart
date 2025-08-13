@@ -24,6 +24,7 @@ part 'header.dart';
 part 'row.dart';
 part 'sort_model.dart';
 part 'table_view_rows.dart';
+part 'table_filter_bar.dart';
 
 /// [PagedDataTable] renders a table of items that is paginable.
 ///
@@ -132,7 +133,6 @@ final class _PagedDataTableState<K extends Comparable<K>, T> extends State<Paged
   @override
   Widget build(BuildContext context) {
     final theme = PagedDataTableTheme.of(context);
-    final localizations = PagedDataTableLocalization.of(context);
 
     return Card(
       color: theme.backgroundColor,
@@ -147,55 +147,7 @@ final class _PagedDataTableState<K extends Comparable<K>, T> extends State<Paged
 
             return Column(
               children: [
-                FilterBar(
-                  controller: tableController,
-                  theme: theme,
-                  buttonIcons: {"default": Icons.filter_list_rounded},
-                  buttonTooltips: {"default": localizations.showFilterMenuTooltip},
-                  menuBuilder: (String button) => Form(
-                    key: tableController._filtersFormKey,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(localizations.filterByTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
-                        const SizedBox(height: 8),
-                        ...tableController._filtersState.entries
-                            .where((element) => element.value._filter.visible)
-                            .map(
-                              (entry) => Padding(
-                                padding: const EdgeInsets.symmetric(vertical: 6),
-                                child: entry.value._filter.buildPicker(context, entry.value),
-                              ),
-                            ),
-                      ],
-                    ),
-                  ),
-                  onRemoveFilters: (String button) {
-                    tableController.removeFilters();
-                  },
-                  onApplyFilters: (String button) {
-                    // to ensure onSaved is called on filters
-                    tableController._filtersFormKey.currentState!.save();
-                    tableController.applyFilters();
-                  },
-                  center: ListenableBuilder(
-                    listenable: tableController,
-                    builder: (context, child) => FilterBarChipList(
-                      buildFilterChips: tableController._filtersState.values
-                          .where((element) => element.value != null)
-                          .map(
-                            (e) => FilterBarChip(
-                              onDeleted: () {
-                                tableController.removeFilter(e._filter.id);
-                              },
-                              label: Text((e._filter as dynamic).chipFormatter(e.value)),
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ),
-                  trailing: widget.filterBarChild,
-                ),
+                TableFilterBar<K, T>(),
 
                 _Header(
                   controller: tableController,
