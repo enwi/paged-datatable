@@ -1,10 +1,11 @@
 {
+    "@@locale": "es",
     "showFilterMenuTooltip": "Filtrar",
     "filterByTitle": "Filtrar por",
     "applyFilterButtonText": "Aplicar",
     "cancelFilteringButtonText": "Cancelar",
     "removeAllFiltersButtonText": "Borrar",
-    "removeFilterButtonText": "Quitar este filtro",
+    "removeFilterButtonText": "Quitar filtro",
     "refreshText": "Actualizar",
     "editableColumnSaveChangesButtonText": "Guardar cambios",
     "editableColumnCancelButtonText": "Cancelar",

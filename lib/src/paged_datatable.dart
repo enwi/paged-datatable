@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:paged_datatable/paged_datatable.dart';
+import 'package:paged_datatable/src/base_theme.dart';
+import 'package:paged_datatable/src/filter_bar_chip_list.dart';
 import 'package:paged_datatable/src/linked_scroll_controller.dart';
 
 part 'column.dart';
@@ -42,7 +44,7 @@ final class PagedDataTable<K extends Comparable<K>, T> extends StatefulWidget {
   /// The initial page query.
   final K? initialPage;
 
-  /// The list of page sizes availables to be selected in the footer.
+  /// The list of available page sizes to be selected in the footer.
   final List<int>? pageSizes;
 
   /// The callback used to fetch new items.
@@ -91,14 +93,15 @@ final class _PagedDataTableState<K extends Comparable<K>, T> extends State<Paged
   late final horizontalController = linkedControllers.addAndGet();
   late final PagedDataTableController<K, T> tableController;
   // late FixedTableSpanExtent rowSpanExtent, headerRowSpanExtent;
-  late PagedDataTableThemeData theme;
   bool selfConstructedController = false;
 
   @override
   void initState() {
     super.initState();
-    assert(widget.pageSizes != null ? widget.pageSizes!.contains(widget.initialPageSize) : true,
-        "initialPageSize must be inside pageSizes. To disable this restriction, set pageSizes to null.");
+    assert(
+      widget.pageSizes != null ? widget.pageSizes!.contains(widget.initialPageSize) : true,
+      "initialPageSize must be inside pageSizes. To disable this restriction, set pageSizes to null.",
+    );
 
     if (widget.controller == null) {
       selfConstructedController = true;
@@ -120,7 +123,7 @@ final class _PagedDataTableState<K extends Comparable<K>, T> extends State<Paged
   void didUpdateWidget(covariant PagedDataTable<K, T> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.columns.length != widget.columns.length /*!listEquals(oldWidget.columns, widget.columns)*/) {
+    if (oldWidget.columns.length != widget.columns.length /*!listEquals(oldWidget.columns, widget.columns)*/ ) {
       tableController._reset(columns: widget.columns);
       debugPrint("PagedDataTable<$T> changed and rebuilt.");
     }
@@ -128,7 +131,8 @@ final class _PagedDataTableState<K extends Comparable<K>, T> extends State<Paged
 
   @override
   Widget build(BuildContext context) {
-    theme = PagedDataTableTheme.of(context);
+    final theme = PagedDataTableTheme.of(context);
+    final localizations = PagedDataTableLocalization.of(context);
 
     return Card(
       color: theme.backgroundColor,
@@ -143,7 +147,55 @@ final class _PagedDataTableState<K extends Comparable<K>, T> extends State<Paged
 
             return Column(
               children: [
-                FilterBar<K, T>(child: widget.filterBarChild),
+                FilterBar(
+                  controller: tableController,
+                  theme: theme,
+                  buttonIcons: {"default": Icons.filter_list_rounded},
+                  buttonTooltips: {"default": localizations.showFilterMenuTooltip},
+                  menuBuilder: (String button) => Form(
+                    key: tableController._filtersFormKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(localizations.filterByTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 8),
+                        ...tableController._filtersState.entries
+                            .where((element) => element.value._filter.visible)
+                            .map(
+                              (entry) => Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 6),
+                                child: entry.value._filter.buildPicker(context, entry.value),
+                              ),
+                            ),
+                      ],
+                    ),
+                  ),
+                  onRemoveFilters: (String button) {
+                    tableController.removeFilters();
+                  },
+                  onApplyFilters: (String button) {
+                    // to ensure onSaved is called on filters
+                    tableController._filtersFormKey.currentState!.save();
+                    tableController.applyFilters();
+                  },
+                  center: ListenableBuilder(
+                    listenable: tableController,
+                    builder: (context, child) => FilterBarChipList(
+                      buildFilterChips: tableController._filtersState.values
+                          .where((element) => element.value != null)
+                          .map(
+                            (e) => FilterBarChip(
+                              onDeleted: () {
+                                tableController.removeFilter(e._filter.id);
+                              },
+                              label: Text((e._filter as dynamic).chipFormatter(e.value)),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  ),
+                  trailing: widget.filterBarChild,
+                ),
 
                 _Header(
                   controller: tableController,
@@ -176,10 +228,7 @@ final class _PagedDataTableState<K extends Comparable<K>, T> extends State<Paged
                 //   ),
                 // ),
                 const Divider(height: 0, color: Color(0xFFD6D6D6)),
-                SizedBox(
-                  height: theme.footerHeight,
-                  child: widget.footer ?? DefaultFooter<K, T>(),
-                ),
+                SizedBox(height: theme.footerHeight, child: widget.footer ?? DefaultFooter<K, T>()),
               ],
             );
           },

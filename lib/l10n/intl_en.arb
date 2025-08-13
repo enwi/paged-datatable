@@ -1,4 +1,5 @@
 {
+    "@@locale": "en",
     "showFilterMenuTooltip": "Filter",
     "filterByTitle": "Filter by",
     "applyFilterButtonText": "Apply",
@@ -6,7 +7,7 @@
     "removeAllFiltersButtonText": "Remove",
     "editableColumnSaveChangesButtonText": "Save changes",
     "editableColumnCancelButtonText": "Cancel",
-    "removeFilterButtonText": "Remove this filter",
+    "removeFilterButtonText": "Remove filter",
     "refreshText": "Refresh",
     "refreshedAtText": "Last refreshed at {time}",
     "@refreshedAtText": {

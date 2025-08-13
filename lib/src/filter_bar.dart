@@ -1,117 +1,116 @@
 part of 'paged_datatable.dart';
 
-/// The filter bar is displayed before the table header
-class FilterBar<K extends Comparable<K>, T> extends StatefulWidget {
-  final Widget? child;
+/// The filter bar is displayed above the table header
+class FilterBar extends StatelessWidget {
+  /// Controller for FilterBar
+  final FilterBarController controller;
 
-  const FilterBar({super.key, required this.child});
+  /// Theming for FilterBar
+  final FilterBarThemeData theme;
 
-  @override
-  State<StatefulWidget> createState() => _FilterBarState<K, T>();
-}
+  /// Maps button identifiers to icons
+  final Map<String, IconData> buttonIcons;
 
-class _FilterBarState<K extends Comparable<K>, T> extends State<FilterBar<K, T>> {
-  late final theme = PagedDataTableTheme.of(context);
-  late final controller = TableControllerProvider.of<K, T>(context);
+  /// Maps button identifiers to tool tips
+  final Map<String, String> buttonTooltips;
 
-  final chipsListController = ScrollController();
+  /// Builder for filter dialog menu
+  final Widget Function(String button) menuBuilder;
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  /// Called when the filter dialog remove button is pressed
+  final void Function(String button) onRemoveFilters;
 
-    controller.addListener(_onChanged);
-  }
+  /// Called when the filter dialog apply button is pressed
+  final void Function(String button) onApplyFilters;
+
+  /// Optional leading widget
+  final Widget? leading;
+
+  /// Optional center widget, usually [FilterBarChipList]
+  final Widget? center;
+
+  /// Optional trailing widget
+  final Widget? trailing;
+
+  const FilterBar({
+    super.key,
+    required this.controller,
+    required this.theme,
+    required this.buttonIcons,
+    required this.buttonTooltips,
+    required this.menuBuilder,
+    required this.onRemoveFilters,
+    required this.onApplyFilters,
+    this.leading,
+    this.center,
+    this.trailing,
+  });
 
   @override
   Widget build(BuildContext context) {
-    var localizations = PagedDataTableLocalization.of(context);
-
     Widget child = SizedBox(
       height: theme.filterBarHeight,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Flexible(
-            child: Row(
-              children: [
-                /* FILTER BUTTON */
-                if (controller._filtersState.isNotEmpty)
-                  Container(
-                    padding: theme.cellPadding,
-                    margin: theme.padding,
-                    child: Ink(
-                      child: InkWell(
-                        radius: 20,
-                        child: Tooltip(
-                          message: localizations.showFilterMenuTooltip,
-                          child: MouseRegion(
-                            cursor: controller._state == TableState.fetching
-                                ? SystemMouseCursors.basic
-                                : SystemMouseCursors.click,
-                            child: GestureDetector(
-                              onTapDown: controller._state == TableState.fetching
-                                  ? null
-                                  : (details) => _showFilterOverlay(details, context),
-                              child: const Icon(Icons.filter_list_rounded),
-                            ),
-                          ),
+      child: ListenableBuilder(
+        listenable: controller,
+        builder: (context, child) {
+          return Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              /* Leading widget */
+              ?leading,
+
+              /* Buttons and center widget */
+              Flexible(
+                child: Row(
+                  children: [
+                    /* Filter buttons */
+                    ...controller.filterButtons.map(
+                      (button) => Container(
+                        margin: theme.padding,
+                        child: IconButton(
+                          padding: theme.cellPadding,
+                          onPressed: controller.isFetching()
+                              ? null
+                              : () => _showFilterOverlay(
+                                  context,
+                                  theme,
+                                  () => menuBuilder(button),
+                                  () => onRemoveFilters(button),
+                                  () => onApplyFilters(button),
+                                ),
+                          icon: Icon(buttonIcons[button]),
                         ),
                       ),
                     ),
-                  ),
 
-                /* SELECTED FILTERS */
-                Expanded(
-                  child: Scrollbar(
-                    controller: chipsListController,
-                    trackVisibility: true,
-                    child: SingleChildScrollView(
-                      controller: chipsListController,
-                      scrollDirection: Axis.horizontal,
-                      child: Row(
-                        children: controller._filtersState.values
-                            .where((element) => element.value != null)
-                            .map(
-                              (e) => Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                                child: Chip(
-                                  deleteIcon: const Icon(
-                                    Icons.close,
-                                    size: 20,
-                                  ),
-                                  deleteButtonTooltipMessage: "Remove filter", //localizations.removeFilterButtonText,
-                                  onDeleted: () {
-                                    controller.removeFilter(e._filter.id);
-                                  },
-                                  label: Text((e._filter as dynamic).chipFormatter(e.value)),
-                                ),
-                              ),
-                            )
-                            .toList(),
-                      ),
-                    ),
-                  ),
+                    /* Center widget */
+                    if (center != null) Expanded(child: center!),
+                  ],
                 ),
-              ],
-            ),
-          ),
-          if (widget.child != null) widget.child!,
-        ],
+              ),
+
+              /* Trailing widget */
+              ?trailing,
+            ],
+          );
+        },
       ),
     );
 
     if (theme.chipTheme != null) {
-      child = ChipTheme(
-        data: theme.chipTheme!,
-        child: child,
-      );
+      child = ChipTheme(data: theme.chipTheme!, child: child);
     }
 
     return child;
   }
 
-  Future<void> _showFilterOverlay(TapDownDetails details, BuildContext context) {
+  Future<void> _showFilterOverlay(
+    BuildContext context,
+    final FilterBarThemeData theme,
+    final Widget Function() menuBuilder,
+    final void Function() removeFilters,
+    final void Function() applyFilters,
+  ) {
     final mediaWidth = MediaQuery.of(context).size.width;
     final bool isBottomSheet = mediaWidth < theme.filterDialogBreakpoint;
 
@@ -119,10 +118,12 @@ class _FilterBarState<K extends Comparable<K>, T> extends State<FilterBar<K, T>>
       return showModalBottomSheet(
         barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
         context: context,
-        builder: (context) => _FiltersDialog<K, T>(
+        builder: (context) => _FiltersDialog(
+          menuBuilder: menuBuilder,
+          removeFilters: removeFilters,
+          applyFilters: applyFilters,
           availableWidth: mediaWidth,
           rect: null,
-          tableController: controller,
         ),
       );
     }
@@ -136,32 +137,31 @@ class _FilterBarState<K extends Comparable<K>, T> extends State<FilterBar<K, T>>
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
       barrierDismissible: true,
       barrierColor: Colors.transparent,
-      builder: (context) => _FiltersDialog<K, T>(
+      builder: (context) => _FiltersDialog(
+        menuBuilder: menuBuilder,
+        removeFilters: removeFilters,
+        applyFilters: applyFilters,
         availableWidth: mediaWidth,
         rect: rect,
-        tableController: controller,
       ),
     );
   }
-
-  void _onChanged() {
-    setState(() {});
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    chipsListController.dispose();
-    controller.removeListener(_onChanged);
-  }
 }
 
-class _FiltersDialog<K extends Comparable<K>, T> extends StatelessWidget {
-  final RelativeRect? rect;
-  final PagedDataTableController<K, T> tableController;
+class _FiltersDialog extends StatelessWidget {
+  final Widget Function() menuBuilder;
+  final void Function() removeFilters;
+  final void Function() applyFilters;
   final double availableWidth;
+  final RelativeRect? rect;
 
-  const _FiltersDialog({required this.rect, required this.availableWidth, required this.tableController});
+  const _FiltersDialog({
+    required this.menuBuilder,
+    required this.removeFilters,
+    required this.applyFilters,
+    required this.availableWidth,
+    this.rect,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -169,22 +169,7 @@ class _FiltersDialog<K extends Comparable<K>, T> extends StatelessWidget {
 
     Widget filtersList = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8.0),
-      child: Form(
-        key: tableController._filtersFormKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(localizations.filterByTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            ...tableController._filtersState.entries.where((element) => element.value._filter.visible).map(
-                  (entry) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    child: entry.value._filter.buildPicker(context, entry.value),
-                  ),
-                )
-          ],
-        ),
-      ),
+      child: menuBuilder.call(),
     );
 
     final buttons = Padding(
@@ -193,11 +178,12 @@ class _FiltersDialog<K extends Comparable<K>, T> extends StatelessWidget {
         children: [
           TextButton(
             style: TextButton.styleFrom(
-                foregroundColor: Theme.of(context).colorScheme.secondary,
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20)),
+              foregroundColor: Theme.of(context).colorScheme.secondary,
+              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+            ),
             onPressed: () {
               Navigator.pop(context);
-              tableController.removeFilters();
+              removeFilters.call();
             },
             child: Text(localizations.removeAllFiltersButtonText),
           ),
@@ -213,10 +199,8 @@ class _FiltersDialog<K extends Comparable<K>, T> extends StatelessWidget {
           FilledButton(
             style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20)),
             onPressed: () {
-              // to ensure onSaved is called on filters
-              tableController._filtersFormKey.currentState!.save();
               Navigator.pop(context);
-              tableController.applyFilters();
+              applyFilters.call();
             },
             child: Text(localizations.applyFilterButtonText),
           ),

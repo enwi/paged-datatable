@@ -43,13 +43,13 @@ class Post {
 
   @override
   String toString() =>
-      "Post(id: $id, author: $author, content: ${content.length > 50 ? content.substring(0, 50) + '...' : content}, createdAt: $createdAt, isEnabled: $isEnabled, number: $number, authorGender: $authorGender)";
+      "Post(id: $id, author: $author, content: ${content.length > 50 ? '${content.substring(0, 50)}...' : content}, createdAt: $createdAt, isEnabled: $isEnabled, number: $number, authorGender: $authorGender)";
 }
 
 enum Gender {
   male("Male"),
   female("Female"),
-  unespecified("Unspecified");
+  unspecified("Unspecified");
 
   const Gender(this.name);
 
@@ -89,10 +89,8 @@ class PostsRepository {
       switch (sortBy) {
         case "createdAt":
           query = sortDescending
-              ? query.orderByDescending(
-                  (element) => element.createdAt.millisecondsSinceEpoch)
-              : query.orderBy(
-                  (element) => element.createdAt.millisecondsSinceEpoch);
+              ? query.orderByDescending((element) => element.createdAt.millisecondsSinceEpoch)
+              : query.orderBy((element) => element.createdAt.millisecondsSinceEpoch);
           break;
 
         case "number":
@@ -125,21 +123,18 @@ class PostsRepository {
     }
 
     if (between != null) {
-      query = query.where((element) =>
-          between.start.isBefore(element.createdAt) &&
-          between.end.isAfter(element.createdAt));
+      query =
+          query.where((element) => between.start.isBefore(element.createdAt) && between.end.isAfter(element.createdAt));
     }
 
     if (authorName != null) {
-      query = query.where((element) =>
-          element.author.toLowerCase().contains(authorName.toLowerCase()));
+      query = query.where((element) => element.author.toLowerCase().contains(authorName.toLowerCase()));
     }
 
     if (searchQuery != null) {
       searchQuery = searchQuery.toLowerCase();
       query = query.where((element) =>
-          element.author.toLowerCase().startsWith(searchQuery!) ||
-          element.content.toLowerCase().contains(searchQuery));
+          element.author.toLowerCase().startsWith(searchQuery!) || element.content.toLowerCase().contains(searchQuery));
     }
 
     var resultSet = query.take(pageSize + 1).toList();

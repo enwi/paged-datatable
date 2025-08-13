@@ -1,4 +1,5 @@
 {
+    "@@locale": "it",
     "showFilterMenuTooltip": "Filtro",
     "filterByTitle": "Filtra per",
     "applyFilterButtonText": "Applica",

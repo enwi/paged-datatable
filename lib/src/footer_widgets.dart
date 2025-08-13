@@ -85,7 +85,7 @@ class _PageSizeSelectorState<K extends Comparable<K>, T> extends State<PageSizeS
             items: controller._pageSizes!
                 .map((pageSize) => DropdownMenuItem(value: pageSize, child: Text(pageSize.toString())))
                 .toList(growable: false),
-            onChanged: controller._state == TableState.fetching
+            onChanged: controller.isFetching()
                 ? null
                 : (newPageSize) {
                     if (newPageSize != null) {
@@ -236,15 +236,14 @@ class _NavigationButtonsState<K extends Comparable<K>, T> extends State<Navigati
           tooltip: localizations.previousPageButtonText,
           splashRadius: 20,
           icon: const Icon(Icons.keyboard_arrow_left_rounded),
-          onPressed:
-              (controller.hasPreviousPage && controller._state != TableState.fetching) ? controller.previousPage : null,
+          onPressed: (controller.hasPreviousPage && !controller.isFetching()) ? controller.previousPage : null,
         ),
         const SizedBox(width: 12),
         IconButton(
           tooltip: localizations.nextPageButtonText,
           splashRadius: 20,
           icon: const Icon(Icons.keyboard_arrow_right_rounded),
-          onPressed: (controller.hasNextPage && controller._state != TableState.fetching) ? controller.nextPage : null,
+          onPressed: (controller.hasNextPage && !controller.isFetching()) ? controller.nextPage : null,
         ),
         const SizedBox(width: 10),
       ],

@@ -79,15 +79,11 @@ final class TextTableFilter extends TableFilter<String> {
 
 /// A [TableFilter] that is not visible in the filter selection but can be set using the controller.
 final class ProgrammingTextFilter<T extends Object> extends TableFilter<T> {
-  ProgrammingTextFilter({
-    required super.id,
-    required super.chipFormatter,
-    required super.initialValue,
-  }) : super(enabled: true, visible: false, name: "");
+  ProgrammingTextFilter({required super.id, required super.chipFormatter, required super.initialValue})
+    : super(enabled: true, visible: false, name: "");
 
   @override
-  Widget buildPicker(BuildContext context, FilterState<T> state) =>
-      const SizedBox.shrink();
+  Widget buildPicker(BuildContext context, FilterState<T> state) => const SizedBox.shrink();
 }
 
 /// A [TableFilter] that renders a [DropdownButtonFormField].
@@ -147,22 +143,21 @@ final class DateTimePickerTableFilter extends TableFilter<DateTime> {
   });
 
   @override
-  Widget buildPicker(BuildContext context, FilterState<DateTime> state) =>
-      _DateTimePicker(
-        firstDate: firstDate,
-        initialDate: initialDate,
-        initialDatePickerMode: initialDatePickerMode,
-        initialEntryMode: initialEntryMode,
-        lastDate: lastDate,
-        selectableDayPredicate: selectableDayPredicate,
-        dateFormat: dateFormat,
-        value: state.value,
-        inputDecoration: inputDecoration,
-        name: name,
-        onChanged: (newValue) {
-          state.value = newValue;
-        },
-      );
+  Widget buildPicker(BuildContext context, FilterState<DateTime> state) => _DateTimePicker(
+    firstDate: firstDate,
+    initialDate: initialDate,
+    initialDatePickerMode: initialDatePickerMode,
+    initialEntryMode: initialEntryMode,
+    lastDate: lastDate,
+    selectableDayPredicate: selectableDayPredicate,
+    dateFormat: dateFormat,
+    value: state.value,
+    inputDecoration: inputDecoration,
+    name: name,
+    onChanged: (newValue) {
+      state.value = newValue;
+    },
+  );
 }
 
 /// A [TableFilter] that renders a [TextField] that, when selected, opens a [DateTimeRange] picker.
@@ -194,35 +189,28 @@ final class DateRangePickerTableFilter extends TableFilter<DateTimeRange> {
   });
 
   @override
-  Widget buildPicker(BuildContext context, FilterState<DateTimeRange> state) =>
-      _DateRangePicker(
-        firstDate: firstDate,
-        formatter: formatter,
-        initialDateRange: initialDateRange,
-        initialDatePickerMode: initialDatePickerMode,
-        initialEntryMode: initialEntryMode,
-        lastDate: lastDate,
-        value: state.value,
-        inputDecoration: inputDecoration,
-        name: name,
-        dialogBuilder: dialogBuilder,
-        onChanged: (newValue) {
-          state.value = newValue;
-        },
-      );
+  Widget buildPicker(BuildContext context, FilterState<DateTimeRange> state) => _DateRangePicker(
+    firstDate: firstDate,
+    formatter: formatter,
+    initialDateRange: initialDateRange,
+    initialDatePickerMode: initialDatePickerMode,
+    initialEntryMode: initialEntryMode,
+    lastDate: lastDate,
+    value: state.value,
+    inputDecoration: inputDecoration,
+    name: name,
+    dialogBuilder: dialogBuilder,
+    onChanged: (newValue) {
+      state.value = newValue;
+    },
+  );
 
   /// A convenient method to create a [TransitionBuilder] that builds the DateRangePicker dialog with a given size.
   ///
   /// This is useful on desktop platforms.
   static TransitionBuilder sizedDialog(double height, double width) {
     return (context, child) => Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              maxWidth: 400.0,
-              maxHeight: 600.0,
-            ),
-            child: child,
-          ),
-        );
+      child: ConstrainedBox(constraints: const BoxConstraints(maxWidth: 400.0, maxHeight: 600.0), child: child),
+    );
   }
 }

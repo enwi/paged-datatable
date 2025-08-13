@@ -37,10 +37,7 @@ class _DateTimePickerState extends State<_DateTimePicker> {
   void initState() {
     super.initState();
 
-    textController = TextEditingController(
-        text: widget.value == null
-            ? null
-            : widget.dateFormat.format(widget.value!));
+    textController = TextEditingController(text: widget.value == null ? null : widget.dateFormat.format(widget.value!));
   }
 
   @override
@@ -48,9 +45,7 @@ class _DateTimePickerState extends State<_DateTimePicker> {
     return TextFormField(
       readOnly: true,
       controller: textController,
-      decoration: widget.inputDecoration.copyWith(
-        labelText: widget.name,
-      ),
+      decoration: widget.inputDecoration.copyWith(labelText: widget.name),
       onTap: () async {
         final DateTime? result = await showDatePicker(
           context: context,
@@ -115,8 +110,7 @@ class _DateRangePickerState extends State<_DateRangePicker> {
   void initState() {
     super.initState();
 
-    textController = TextEditingController(
-        text: widget.value == null ? null : widget.formatter(widget.value!));
+    textController = TextEditingController(text: widget.value == null ? null : widget.formatter(widget.value!));
   }
 
   @override
@@ -124,9 +118,7 @@ class _DateRangePickerState extends State<_DateRangePicker> {
     return TextFormField(
       readOnly: true,
       controller: textController,
-      decoration: widget.inputDecoration.copyWith(
-        labelText: widget.name,
-      ),
+      decoration: widget.inputDecoration.copyWith(labelText: widget.name),
       onTap: () async {
         final DateTimeRange? result = await showDateRangePicker(
           context: context,

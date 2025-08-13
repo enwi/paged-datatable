@@ -12,8 +12,5 @@ final class SortModel {
 
   @override
   bool operator ==(Object other) =>
-      identical(other, this) ||
-      (other is SortModel &&
-          other.fieldName == fieldName &&
-          other.descending == descending);
+      identical(other, this) || (other is SortModel && other.fieldName == fieldName && other.descending == descending);
 }

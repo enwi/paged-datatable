@@ -1,40 +1,57 @@
 part of 'paged_datatable.dart';
 
-typedef Fetcher<K extends Comparable<K>, T> = FutureOr<(List<T> resultset, K? nextPageToken)> Function(
-    int pageSize, SortModel? sortModel, FilterModel filterModel, K? pageToken);
+typedef Fetcher<K extends Comparable<K>, T> =
+    FutureOr<(List<T> resultset, K? nextPageToken)> Function(
+      int pageSize,
+      SortModel? sortModel,
+      FilterModel filterModel,
+      K? pageToken,
+    );
 
 typedef RowChangeListener<K extends Comparable<K>, T> = void Function(int index, T item);
 
 /// [PagedDataTableController] represents the state of a [PagedDataTable] of type [T], using pagination keys of type [K].
 ///
 /// Is recommended that [T] specifies a custom hashCode and equals method for comparison reasons.
-final class PagedDataTableController<K extends Comparable<K>, T> extends ChangeNotifier {
-  final List<T> _currentDataset = []; // the current dataset that is being displayed
-  final Map<String, FilterState> _filtersState = {}; // The list of filters' states
-  final Map<int, K> _paginationKeys = {}; // it's a map because on not found map will return null, list will throw
-  final Set<int> _selectedRows = {}; // The list of selected row indexes
+final class PagedDataTableController<K extends Comparable<K>, T> extends FilterBarController {
+  // the current dataset that is being displayed
+  final List<T> _currentDataset = [];
+  // The list of filters' states
+  final Map<String, FilterState> _filtersState = {};
+  // it's a map because on not found map will return null, list will throw
+  final Map<int, K> _paginationKeys = {};
+  // The list of selected row indexes
+  final Set<int> _selectedRows = {};
   final GlobalKey<FormState> _filtersFormKey = GlobalKey();
   List<int>? _pageSizes;
-  Fetcher<K, T>? _fetcher; // The function used to fetch items
+  // The function used to fetch items
+  Fetcher<K, T>? _fetcher;
+  // The list of special listeners which all are functions
   final Map<_ListenerType, dynamic> _listeners = {
-    // The list of special listeners which all are functions
-
     // Callbacks for row change. The key of the map is the row index, the value the list of listeners for the row
     _ListenerType.rowChange: <int, List<RowChangeListener<K, T>>>{},
   };
   PagedDataTableConfiguration? _configuration;
 
-  Object? _currentError; // If something went wrong when fetching items, this is the latest error
-  int _totalItems = 0; // the total items in the current dataset
+  // If something went wrong when fetching items, this is the latest error
+  Object? _currentError;
+  // the total items in the current dataset
+  int _totalItems = 0;
   int _currentPageSize = 0;
-  int _currentPageIndex = 0; // The current index of the page, used to lookup token inside _paginationKeys
-  bool _hasNextPage = false; // a flag that indicates if there are more pages after the current one
-  SortModel? _currentSortModel; // The current sort model of the table
+  // The current index of the page, used to lookup token inside _paginationKeys
+  int _currentPageIndex = 0;
+  // a flag that indicates if there are more pages after the current one
+  bool _hasNextPage = false;
+  // The current sort model of the table
+  SortModel? _currentSortModel;
   TableState _state = TableState.idle;
+  @override
   TableState get state => _state;
+  @override
+  List<String> get filterButtons => ["default"];
   FilterModel get filterModel => FilterModel._(_filtersState.map((key, value) => MapEntry(key, value.value)));
 
-  /// A flag that indicates if the dataaset has a next page
+  /// A flag that indicates if the dataset has a next page
   bool get hasNextPage => _hasNextPage;
 
   /// A flag that indicates if the dataset has a previous page
@@ -273,10 +290,7 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends ChangeN
   }
 
   /// Sets filter [filterId]'s value and applies all filters if [apply] is true
-  void addFilter<F extends Object>(
-    TableFilter<F> filter, {
-    bool apply = true,
-  }) {
+  void addFilter<F extends Object>(TableFilter<F> filter, {bool apply = true}) {
     _filtersState[filter.id] = filter.createState();
 
     if (apply) {
@@ -285,11 +299,7 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends ChangeN
   }
 
   /// Sets filter [filterId]'s value and applies all filters if [apply] is true
-  void setFilter(
-    String filterId,
-    dynamic value, {
-    bool apply = true,
-  }) {
+  void setFilter(String filterId, dynamic value, {bool apply = true}) {
     final filterState = _filtersState[filterId];
     if (filterState == null) {
       throw ArgumentError("Filter with id $filterId does not exist.", "filterId");
@@ -442,12 +452,4 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends ChangeN
   }
 }
 
-enum TableState {
-  idle,
-  fetching,
-  error,
-}
-
-enum _ListenerType {
-  rowChange,
-}
+enum _ListenerType { rowChange }

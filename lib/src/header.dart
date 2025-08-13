@@ -52,15 +52,16 @@ final class _HeaderState<K extends Comparable<K>, T> extends State<_Header<K, T>
                 if (widget.fixedColumnCount > 0) ...fixedColumns,
                 Expanded(
                   child: _ScrollableColumns(
-                      controller: widget.horizontalController,
-                      children: columns.map((e) => SliverToBoxAdapter(child: e)).toList(growable: false)),
+                    controller: widget.horizontalController,
+                    children: columns.map((e) => SliverToBoxAdapter(child: e)).toList(growable: false),
+                  ),
                 ),
               ],
             ),
             Align(
               alignment: Alignment.bottomCenter,
-              child: tableState == TableState.fetching ? const LinearProgressIndicator() : const SizedBox.shrink(),
-            )
+              child: tableState.isFetching() ? const LinearProgressIndicator() : const SizedBox.shrink(),
+            ),
           ],
         ),
       ),
@@ -94,13 +95,14 @@ final class _HeaderState<K extends Comparable<K>, T> extends State<_Header<K, T>
       margin: theme.padding,
       child: column.format.transform(
         Tooltip(
-            textAlign: TextAlign.left,
-            message: column.title is Text
-                ? (column.title as Text).data!
-                : column.title is RichText
-                    ? (column.title as RichText).text.toPlainText()
-                    : column.tooltip ?? "",
-            child: column.title),
+          textAlign: TextAlign.left,
+          message: column.title is Text
+              ? (column.title as Text).data!
+              : column.title is RichText
+              ? (column.title as RichText).text.toPlainText()
+              : column.tooltip ?? "",
+          child: column.title,
+        ),
       ),
     );
 
@@ -124,7 +126,7 @@ final class _HeaderState<K extends Comparable<K>, T> extends State<_Header<K, T>
               onPressed: () {
                 widget.controller.swipeSortModel(column.id);
               },
-            )
+            ),
           ],
         );
       }
@@ -155,7 +157,7 @@ class _ScrollableColumns extends ScrollView {
   final List<Widget> children;
 
   const _ScrollableColumns({required this.children, required ScrollController controller})
-      : super(scrollDirection: Axis.horizontal, controller: controller);
+    : super(scrollDirection: Axis.horizontal, controller: controller);
 
   @override
   List<Widget> buildSlivers(BuildContext context) => children;

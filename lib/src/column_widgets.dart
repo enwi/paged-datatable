@@ -1,7 +1,6 @@
 part of 'paged_datatable.dart';
 
-final class _SelectRowCheckbox<K extends Comparable<K>, T>
-    extends StatelessWidget {
+final class _SelectRowCheckbox<K extends Comparable<K>, T> extends StatelessWidget {
   final int index;
 
   const _SelectRowCheckbox({required this.index, super.key});
@@ -18,16 +17,14 @@ final class _SelectRowCheckbox<K extends Comparable<K>, T>
   }
 }
 
-final class _SelectAllRowsCheckbox<K extends Comparable<K>, T>
-    extends StatefulWidget {
+final class _SelectAllRowsCheckbox<K extends Comparable<K>, T> extends StatefulWidget {
   const _SelectAllRowsCheckbox({super.key});
 
   @override
   State<StatefulWidget> createState() => _SelectAllRowsCheckboxState<K, T>();
 }
 
-final class _SelectAllRowsCheckboxState<K extends Comparable<K>, T>
-    extends State<_SelectAllRowsCheckbox<K, T>> {
+final class _SelectAllRowsCheckboxState<K extends Comparable<K>, T> extends State<_SelectAllRowsCheckbox<K, T>> {
   late final tableController = TableControllerProvider.of<K, T>(context);
   bool? state;
 
@@ -63,8 +60,8 @@ final class _SelectAllRowsCheckboxState<K extends Comparable<K>, T>
     final newState = tableController._selectedRows.isEmpty
         ? false
         : tableController._selectedRows.length == tableController._totalItems
-            ? true
-            : null;
+        ? true
+        : null;
 
     if (state != newState) {
       setState(() {
@@ -199,8 +196,7 @@ final class _TextFieldCellState<T> extends State<_TextFieldCell<T>> {
                 });
                 final newValue = textController.text;
                 if (newValue != previousValue) {
-                  if (await widget.setter(
-                      widget.item, newValue, widget.index)) {
+                  if (await widget.setter(widget.item, newValue, widget.index)) {
                     previousValue = newValue;
                   } else {
                     textController.text = previousValue ?? '';
@@ -284,8 +280,7 @@ final class _LargeTextFieldCellState<T> extends State<_LargeTextFieldCell<T>> {
   Widget build(BuildContext context) {
     return GestureDetector(
       onDoubleTap: () async {
-        final bool isBottomSheet =
-            MediaQuery.of(context).size.width < widget.bottomSheetBreakpoint;
+        final bool isBottomSheet = MediaQuery.of(context).size.width < widget.bottomSheetBreakpoint;
 
         String? newText;
 
@@ -325,7 +320,7 @@ final class _LargeTextFieldCellState<T> extends State<_LargeTextFieldCell<T>> {
           newText = await showDialog(
             context: context,
             useSafeArea: true,
-            barrierColor: Colors.black.withOpacity(.3),
+            barrierColor: Colors.black.withValues(alpha: .3),
             builder: (context) => _EditableTextFieldOverlay(
               position: rect,
               formatters: widget.inputFormatters,
@@ -360,33 +355,22 @@ final class _LargeTextFieldCellState<T> extends State<_LargeTextFieldCell<T>> {
         }
       },
       child: isLoading
-          ? const SizedBox(
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator(),
-            )
+          ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator())
           : (widget.tooltipText
-              ? Tooltip(
-                  richMessage: WidgetSpan(
+                ? Tooltip(
+                    richMessage: WidgetSpan(
                       alignment: PlaceholderAlignment.baseline,
                       baseline: TextBaseline.alphabetic,
                       child: Container(
-                        constraints: widget.tooltipConstraints ??
-                            BoxConstraints(
-                                maxWidth:
-                                    MediaQuery.of(context).size.width / 2),
-                        child: Text(textController.text,
-                            style: widget.tooltipStyle),
-                      )),
-                  child: Text(
-                    textController.text,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                )
-              : Text(
-                  textController.text,
-                  overflow: TextOverflow.ellipsis,
-                )),
+                        constraints:
+                            widget.tooltipConstraints ??
+                            BoxConstraints(maxWidth: MediaQuery.of(context).size.width / 2),
+                        child: Text(textController.text, style: widget.tooltipStyle),
+                      ),
+                    ),
+                    child: Text(textController.text, overflow: TextOverflow.ellipsis),
+                  )
+                : Text(textController.text, overflow: TextOverflow.ellipsis)),
     );
   }
 
@@ -421,8 +405,7 @@ final class _EditableTextFieldOverlay extends StatefulWidget {
   State<StatefulWidget> createState() => _EditableTextFieldOverlayState();
 }
 
-final class _EditableTextFieldOverlayState
-    extends State<_EditableTextFieldOverlay> {
+final class _EditableTextFieldOverlayState extends State<_EditableTextFieldOverlay> {
   late final TextEditingController textController;
   final formKey = GlobalKey<FormState>();
 
@@ -457,8 +440,7 @@ final class _EditableTextFieldOverlayState
                         child: TextFormField(
                           autofocus: true,
                           inputFormatters: widget.formatters,
-                          decoration: widget.decoration
-                              .copyWith(labelText: widget.label),
+                          decoration: widget.decoration.copyWith(labelText: widget.label),
                           validator: widget.validator,
                           controller: textController,
                           keyboardType: TextInputType.multiline,
@@ -471,8 +453,7 @@ final class _EditableTextFieldOverlayState
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           TextButton(
-                            child: Text(
-                                localizations.editableColumnCancelButtonText),
+                            child: Text(localizations.editableColumnCancelButtonText),
                             onPressed: () {
                               Navigator.pop(context);
                             },
@@ -484,11 +465,10 @@ final class _EditableTextFieldOverlayState
                                 Navigator.pop(context, textController.text);
                               }
                             },
-                            child: Text(localizations
-                                .editableColumnSaveChangesButtonText),
-                          )
+                            child: Text(localizations.editableColumnSaveChangesButtonText),
+                          ),
                         ],
-                      )
+                      ),
                     ],
                   ),
                 ),
@@ -526,8 +506,7 @@ final class _EditableTextFieldBottomSheet extends StatefulWidget {
   State<StatefulWidget> createState() => _EditableTextFieldBottomSheetState();
 }
 
-final class _EditableTextFieldBottomSheetState
-    extends State<_EditableTextFieldBottomSheet> {
+final class _EditableTextFieldBottomSheetState extends State<_EditableTextFieldBottomSheet> {
   late final TextEditingController textController;
   final formKey = GlobalKey<FormState>();
 
@@ -543,50 +522,49 @@ final class _EditableTextFieldBottomSheetState
     final localizations = PagedDataTableLocalization.of(context);
     return SafeArea(
       child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Expanded(
-                  child: TextFormField(
-                    autofocus: true,
-                    inputFormatters: widget.formatters,
-                    decoration:
-                        widget.decoration.copyWith(labelText: widget.label),
-                    validator: widget.validator,
-                    controller: textController,
-                    keyboardType: TextInputType.multiline,
-                    maxLines: 12,
-                    minLines: 12,
-                  ),
+        padding: const EdgeInsets.all(20),
+        child: Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Expanded(
+                child: TextFormField(
+                  autofocus: true,
+                  inputFormatters: widget.formatters,
+                  decoration: widget.decoration.copyWith(labelText: widget.label),
+                  validator: widget.validator,
+                  controller: textController,
+                  keyboardType: TextInputType.multiline,
+                  maxLines: 12,
+                  minLines: 12,
                 ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      child: Text(localizations.editableColumnCancelButtonText),
-                      onPressed: () {
-                        Navigator.pop(context);
-                      },
-                    ),
-                    const SizedBox(width: 10),
-                    FilledButton(
-                      onPressed: () {
-                        if (formKey.currentState!.validate()) {
-                          Navigator.pop(context, textController.text);
-                        }
-                      },
-                      child: Text(
-                          localizations.editableColumnSaveChangesButtonText),
-                    )
-                  ],
-                )
-              ],
-            ),
-          )),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    child: Text(localizations.editableColumnCancelButtonText),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                  const SizedBox(width: 10),
+                  FilledButton(
+                    onPressed: () {
+                      if (formKey.currentState!.validate()) {
+                        Navigator.pop(context, textController.text);
+                      }
+                    },
+                    child: Text(localizations.editableColumnSaveChangesButtonText),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

@@ -18,8 +18,10 @@ class PagedDataTableLocalization {
   static PagedDataTableLocalization? _current;
 
   static PagedDataTableLocalization get current {
-    assert(_current != null,
-        'No instance of PagedDataTableLocalization was loaded. Try to initialize the PagedDataTableLocalization delegate before accessing PagedDataTableLocalization.current.');
+    assert(
+      _current != null,
+      'No instance of PagedDataTableLocalization was loaded. Try to initialize the PagedDataTableLocalization delegate before accessing PagedDataTableLocalization.current.',
+    );
     return _current!;
   }
 
@@ -41,14 +43,18 @@ class PagedDataTableLocalization {
 
   static PagedDataTableLocalization of(BuildContext context) {
     final instance = PagedDataTableLocalization.maybeOf(context);
-    assert(instance != null,
-        'No instance of PagedDataTableLocalization present in the widget tree. Did you add PagedDataTableLocalization.delegate in localizationsDelegates?');
+    assert(
+      instance != null,
+      'No instance of PagedDataTableLocalization present in the widget tree. Did you add PagedDataTableLocalization.delegate in localizationsDelegates?',
+    );
     return instance!;
   }
 
   static PagedDataTableLocalization? maybeOf(BuildContext context) {
     return Localizations.of<PagedDataTableLocalization>(
-        context, PagedDataTableLocalization);
+      context,
+      PagedDataTableLocalization,
+    );
   }
 
   /// `Filter`
@@ -63,12 +69,7 @@ class PagedDataTableLocalization {
 
   /// `Filter by`
   String get filterByTitle {
-    return Intl.message(
-      'Filter by',
-      name: 'filterByTitle',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Filter by', name: 'filterByTitle', desc: '', args: []);
   }
 
   /// `Apply`
@@ -121,10 +122,10 @@ class PagedDataTableLocalization {
     );
   }
 
-  /// `Remove this filter`
+  /// `Remove filter`
   String get removeFilterButtonText {
     return Intl.message(
-      'Remove this filter',
+      'Remove filter',
       name: 'removeFilterButtonText',
       desc: '',
       args: [],
@@ -133,12 +134,7 @@ class PagedDataTableLocalization {
 
   /// `Refresh`
   String get refreshText {
-    return Intl.message(
-      'Refresh',
-      name: 'refreshText',
-      desc: '',
-      args: [],
-    );
+    return Intl.message('Refresh', name: 'refreshText', desc: '', args: []);
   }
 
   /// `Last refreshed at {time}`

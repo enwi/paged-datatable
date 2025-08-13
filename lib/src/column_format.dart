@@ -11,8 +11,7 @@ class NumericColumnFormat implements ColumnFormat {
   const NumericColumnFormat();
 
   @override
-  Widget transform(Widget cell) =>
-      Align(alignment: Alignment.centerRight, child: cell);
+  Widget transform(Widget cell) => Align(alignment: Alignment.centerRight, child: cell);
 }
 
 /// Applies [alignment] to the cell content.
