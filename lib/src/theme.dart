@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:paged_datatable/src/base_theme.dart';
+import 'package:paged_datatable/src/filter_bar_theme.dart';
 
 final class PagedDataTableThemeData extends FilterBarThemeData {
   /// The [BorderRadius] of the table.

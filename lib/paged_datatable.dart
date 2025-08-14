@@ -4,6 +4,7 @@ export './src/column_size.dart';
 export './src/column_format.dart';
 export './src/configuration.dart';
 export './src/filter_bar_controller.dart';
+export './src/filter_bar_theme.dart';
 export './src/footer.dart';
 export './src/theme.dart';
 export './src/table_controller_provider.dart';

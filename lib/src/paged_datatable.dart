@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:paged_datatable/paged_datatable.dart';
-import 'package:paged_datatable/src/base_theme.dart';
 import 'package:paged_datatable/src/filter_bar_chip_list.dart';
 import 'package:paged_datatable/src/linked_scroll_controller.dart';
 
