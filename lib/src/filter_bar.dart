@@ -81,6 +81,7 @@ class FilterBar extends StatelessWidget {
                                       () => onRemoveFilters(button),
                                       () => onApplyFilters(button),
                                     ),
+                              tooltip: buttonTooltips[button],
                               icon: Icon(buttonIcons[button]),
                             ),
                           ),
