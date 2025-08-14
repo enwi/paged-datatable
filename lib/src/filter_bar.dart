@@ -223,11 +223,7 @@ class _FiltersDialog extends StatelessWidget {
       elevation: 0,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          filtersList,
-          const Divider(height: 0, color: Color(0xFFD6D6D6)),
-          buttons,
-        ],
+        children: [filtersList, const Divider(height: 0), buttons],
       ),
     );
 

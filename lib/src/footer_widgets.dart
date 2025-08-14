@@ -93,10 +93,10 @@ class _PageSizeSelectorState<K extends Comparable<K>, T> extends State<PageSizeS
                     }
                   },
             style: theme.footerTextStyle.copyWith(fontSize: 14),
-            decoration: const InputDecoration(
-              border: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFFD6D6D6))),
+            decoration: InputDecoration(
+              border: OutlineInputBorder(borderSide: Divider.createBorderSide(context)),
               isCollapsed: true,
-              contentPadding: EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
             ),
           ),
         ),

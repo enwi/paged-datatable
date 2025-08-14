@@ -100,7 +100,7 @@ class _TableViewRowsState<K extends Comparable<K>, T> extends State<_TableViewRo
     final TableSpanDecoration decoration = TableSpanDecoration(
       color: theme.cellColor?.call(index),
       border: const TableSpanBorder(
-        trailing: BorderSide(width: 1, color: Color(0xFFD6D6D6)),
+        trailing: Divider.createBorderSide(context),
       ),
     );
 
