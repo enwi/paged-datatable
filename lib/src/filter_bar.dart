@@ -64,22 +64,27 @@ class FilterBar extends StatelessWidget {
                 child: Row(
                   children: [
                     /* Filter buttons */
-                    ...controller.filterButtons.map(
-                      (button) => Container(
-                        margin: theme.padding,
-                        child: IconButton(
-                          padding: theme.cellPadding,
-                          onPressed: controller.isFetching()
-                              ? null
-                              : () => _showFilterOverlay(
-                                  context,
-                                  theme,
-                                  () => menuBuilder(button),
-                                  () => onRemoveFilters(button),
-                                  () => onApplyFilters(button),
-                                ),
-                          icon: Icon(buttonIcons[button]),
-                        ),
+                    Container(
+                      margin: theme.padding,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          ...controller.filterButtons.map(
+                            (button) => IconButton(
+                              padding: theme.cellPadding,
+                              onPressed: controller.isFetching()
+                                  ? null
+                                  : () => _showFilterOverlay(
+                                      context,
+                                      theme,
+                                      () => menuBuilder(button),
+                                      () => onRemoveFilters(button),
+                                      () => onApplyFilters(button),
+                                    ),
+                              icon: Icon(buttonIcons[button]),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
 
