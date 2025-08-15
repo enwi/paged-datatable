@@ -18,10 +18,13 @@ class FilterBar extends StatelessWidget {
   final Widget Function(String button) menuBuilder;
 
   /// Called when the filter dialog remove button is pressed
-  final void Function(String button) onRemoveFilters;
+  final void Function(String button)? onRemoveFilters;
+
+  /// Called when the filter dialog cancel button is pressed
+  final void Function(String button)? onCancelFilters;
 
   /// Called when the filter dialog apply button is pressed
-  final void Function(String button) onApplyFilters;
+  final void Function(String button)? onApplyFilters;
 
   /// Optional leading widget
   final Widget? leading;
@@ -39,8 +42,9 @@ class FilterBar extends StatelessWidget {
     required this.buttonIcons,
     required this.buttonTooltips,
     required this.menuBuilder,
-    required this.onRemoveFilters,
-    required this.onApplyFilters,
+    this.onRemoveFilters,
+    this.onCancelFilters,
+    this.onApplyFilters,
     this.leading,
     this.center,
     this.trailing,
@@ -75,11 +79,13 @@ class FilterBar extends StatelessWidget {
                               onPressed: controller.isFetching()
                                   ? null
                                   : () => _showFilterOverlay(
-                                      context,
-                                      theme,
-                                      () => menuBuilder(button),
-                                      () => onRemoveFilters(button),
-                                      () => onApplyFilters(button),
+                                      context: context,
+                                      theme: theme,
+                                      menuBuilder: () => menuBuilder(button),
+                                      onRemoveFilters: () => onRemoveFilters?.call(button),
+                                      onCancelFilters: () =>
+                                          () => onCancelFilters?.call(button),
+                                      onApplyFilters: () => onApplyFilters?.call(button),
                                     ),
                               tooltip: buttonTooltips[button],
                               icon: Icon(buttonIcons[button]),
@@ -110,13 +116,14 @@ class FilterBar extends StatelessWidget {
     return child;
   }
 
-  Future<void> _showFilterOverlay(
-    BuildContext context,
-    final FilterBarThemeData theme,
-    final Widget Function() menuBuilder,
-    final void Function() removeFilters,
-    final void Function() applyFilters,
-  ) {
+  Future<void> _showFilterOverlay({
+    required final BuildContext context,
+    required final FilterBarThemeData theme,
+    required final Widget Function() menuBuilder,
+    final void Function()? onRemoveFilters,
+    final void Function()? onCancelFilters,
+    final void Function()? onApplyFilters,
+  }) {
     final mediaWidth = MediaQuery.of(context).size.width;
     final bool isBottomSheet = mediaWidth < theme.filterDialogBreakpoint;
 
@@ -126,8 +133,9 @@ class FilterBar extends StatelessWidget {
         context: context,
         builder: (context) => _FiltersDialog(
           menuBuilder: menuBuilder,
-          removeFilters: removeFilters,
-          applyFilters: applyFilters,
+          onRemoveFilters: onRemoveFilters,
+          onCancelFilters: onCancelFilters,
+          onApplyFilters: onApplyFilters,
           availableWidth: mediaWidth,
           rect: null,
         ),
@@ -145,8 +153,9 @@ class FilterBar extends StatelessWidget {
       barrierColor: Colors.transparent,
       builder: (context) => _FiltersDialog(
         menuBuilder: menuBuilder,
-        removeFilters: removeFilters,
-        applyFilters: applyFilters,
+        onRemoveFilters: onRemoveFilters,
+        onCancelFilters: onCancelFilters,
+        onApplyFilters: onApplyFilters,
         availableWidth: mediaWidth,
         rect: rect,
       ),
@@ -156,15 +165,17 @@ class FilterBar extends StatelessWidget {
 
 class _FiltersDialog extends StatelessWidget {
   final Widget Function() menuBuilder;
-  final void Function() removeFilters;
-  final void Function() applyFilters;
+  final void Function()? onRemoveFilters;
+  final void Function()? onCancelFilters;
+  final void Function()? onApplyFilters;
   final double availableWidth;
   final RelativeRect? rect;
 
   const _FiltersDialog({
     required this.menuBuilder,
-    required this.removeFilters,
-    required this.applyFilters,
+    this.onRemoveFilters,
+    this.onCancelFilters,
+    this.onApplyFilters,
     required this.availableWidth,
     this.rect,
   });
@@ -189,7 +200,7 @@ class _FiltersDialog extends StatelessWidget {
             ),
             onPressed: () {
               Navigator.pop(context);
-              removeFilters.call();
+              onRemoveFilters?.call();
             },
             child: Text(localizations.removeAllFiltersButtonText),
           ),
@@ -198,6 +209,7 @@ class _FiltersDialog extends StatelessWidget {
             style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20)),
             onPressed: () {
               Navigator.pop(context);
+              onCancelFilters?.call();
             },
             child: Text(localizations.cancelFilteringButtonText),
           ),
@@ -206,7 +218,7 @@ class _FiltersDialog extends StatelessWidget {
             style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20)),
             onPressed: () {
               Navigator.pop(context);
-              applyFilters.call();
+              onApplyFilters?.call();
             },
             child: Text(localizations.applyFilterButtonText),
           ),
