@@ -131,6 +131,7 @@ class FilterBar extends StatelessWidget {
         barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
         context: context,
         builder: (context) => _FiltersDialog(
+          theme: theme,
           menuBuilder: menuBuilder,
           onRemoveFilters: onRemoveFilters,
           onCancelFilters: onCancelFilters,
@@ -151,6 +152,7 @@ class FilterBar extends StatelessWidget {
       barrierDismissible: true,
       barrierColor: Colors.transparent,
       builder: (context) => _FiltersDialog(
+        theme: theme,
         menuBuilder: menuBuilder,
         onRemoveFilters: onRemoveFilters,
         onCancelFilters: onCancelFilters,
@@ -163,6 +165,7 @@ class FilterBar extends StatelessWidget {
 }
 
 class _FiltersDialog extends StatelessWidget {
+  final FilterBarThemeData theme;
   final Widget Function() menuBuilder;
   final void Function()? onRemoveFilters;
   final void Function()? onCancelFilters;
@@ -171,6 +174,7 @@ class _FiltersDialog extends StatelessWidget {
   final RelativeRect? rect;
 
   const _FiltersDialog({
+    required this.theme,
     required this.menuBuilder,
     this.onRemoveFilters,
     this.onCancelFilters,
@@ -246,7 +250,7 @@ class _FiltersDialog extends StatelessWidget {
             top: rect!.top,
             left: rect!.left,
             child: Container(
-              width: availableWidth / 3,
+              width: availableWidth * theme.filterDialogWidthFactor,
               decoration: const BoxDecoration(
                 color: Colors.white,
                 boxShadow: [BoxShadow(blurRadius: 3, color: Colors.black54)],

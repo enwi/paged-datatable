@@ -44,11 +44,12 @@ final class PagedDataTableThemeData extends FilterBarThemeData {
   /// A flag that indicates if the horizontal scrollbar should be visible.
   final bool horizontalScrollbarVisibility;
 
-  const PagedDataTableThemeData({
-    super.cellPadding = const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
-    super.padding = const EdgeInsets.symmetric(horizontal: 16.0),
-    super.filterBarHeight = 50.0,
-    super.filterDialogBreakpoint = 1000.0,
+  PagedDataTableThemeData({
+    super.cellPadding,
+    super.padding,
+    super.filterBarHeight,
+    super.filterDialogBreakpoint,
+    super.filterDialogWidthFactor,
     super.chipTheme,
     this.borderRadius = const BorderRadius.all(Radius.circular(4.0)),
     this.elevation = 0.0,
@@ -124,5 +125,5 @@ final class PagedDataTableTheme extends InheritedWidget {
       context.dependOnInheritedWidgetOfExactType<PagedDataTableTheme>()?.data;
 
   /// Lookups for a [PagedDataTableTheme] widget in the widget tree, if not found, then default [PagedDataTableThemeData] is returned.
-  static PagedDataTableThemeData of(BuildContext context) => maybeOf(context) ?? const PagedDataTableThemeData();
+  static PagedDataTableThemeData of(BuildContext context) => maybeOf(context) ?? PagedDataTableThemeData();
 }
