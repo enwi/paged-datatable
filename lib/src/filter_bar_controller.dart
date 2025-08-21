@@ -7,7 +7,4 @@ abstract class FilterBarController extends ChangeNotifier {
   bool isIdle() => state.isIdle();
   bool isFetching() => state.isFetching();
   bool isError() => state.isError();
-
-  /// Get all filter button identifiers
-  List<String> get filterButtons;
 }

@@ -14,34 +14,38 @@ class TableFilterBar<K extends Comparable<K>, T> extends StatelessWidget {
     return FilterBar(
       controller: controller,
       theme: theme,
-      buttonIcons: {"default": Icons.filter_list_rounded},
-      buttonTooltips: {"default": localizations.showFilterMenuTooltip},
-      menuBuilder: (String button) => Form(
-        key: controller._filtersFormKey,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(localizations.filterByTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            ...controller._filtersState.entries
-                .where((element) => element.value._filter.visible)
-                .map(
-                  (entry) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 6),
-                    child: entry.value._filter.buildPicker(context, entry.value),
-                  ),
-                ),
-          ],
+      menuButtons: [
+        FilterBarMenuButton(
+          icon: Icons.filter_list_rounded,
+          tooltip: localizations.showFilterMenuTooltip,
+          onRemoveFilters: () => controller.removeFilters(),
+          onCancelFilters: () {},
+          onApplyFilters: () {
+            // to ensure onSaved is called on filters
+            controller._filtersFormKey.currentState!.save();
+            controller.applyFilters();
+          },
+          menuBuilder: () => Form(
+            key: controller._filtersFormKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(localizations.filterByTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
+                const SizedBox(height: 8),
+                ...controller._filtersState.entries
+                    .where((element) => element.value._filter.visible)
+                    .map(
+                      (entry) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 6),
+                        child: entry.value._filter.buildPicker(context, entry.value),
+                      ),
+                    ),
+              ],
+            ),
+          ),
         ),
-      ),
-      onRemoveFilters: (String button) {
-        controller.removeFilters();
-      },
-      onApplyFilters: (String button) {
-        // to ensure onSaved is called on filters
-        controller._filtersFormKey.currentState!.save();
-        controller.applyFilters();
-      },
+      ],
+
       center: ListenableBuilder(
         listenable: controller,
         builder: (context, child) => FilterBarChipList(

@@ -47,8 +47,6 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends FilterB
   TableState _state = TableState.idle;
   @override
   TableState get state => _state;
-  @override
-  List<String> get filterButtons => ["default"];
   FilterModel get filterModel => FilterModel._(_filtersState.map((key, value) => MapEntry(key, value.value)));
 
   /// A flag that indicates if the dataset has a next page

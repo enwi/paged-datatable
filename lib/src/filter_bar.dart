@@ -8,23 +8,8 @@ class FilterBar extends StatelessWidget {
   /// Theming for FilterBar
   final FilterBarThemeData theme;
 
-  /// Maps button identifiers to icons
-  final Map<String, IconData> buttonIcons;
-
-  /// Maps button identifiers to tool tips
-  final Map<String, String> buttonTooltips;
-
-  /// Builder for filter dialog menu
-  final Widget Function(String button) menuBuilder;
-
-  /// Called when the filter dialog remove button is pressed
-  final void Function(String button)? onRemoveFilters;
-
-  /// Called when the filter dialog cancel button is pressed
-  final void Function(String button)? onCancelFilters;
-
-  /// Called when the filter dialog apply button is pressed
-  final void Function(String button)? onApplyFilters;
+  /// All filter bar menu buttons
+  final List<FilterBarMenuButton> menuButtons;
 
   /// Optional leading widget
   final Widget? leading;
@@ -39,12 +24,7 @@ class FilterBar extends StatelessWidget {
     super.key,
     required this.controller,
     required this.theme,
-    required this.buttonIcons,
-    required this.buttonTooltips,
-    required this.menuBuilder,
-    this.onRemoveFilters,
-    this.onCancelFilters,
-    this.onApplyFilters,
+    required this.menuButtons,
     this.leading,
     this.center,
     this.trailing,
@@ -73,7 +53,7 @@ class FilterBar extends StatelessWidget {
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          ...controller.filterButtons.map(
+                          ...menuButtons.map(
                             (button) => IconButton(
                               padding: theme.cellPadding,
                               onPressed: controller.isFetching()
@@ -81,13 +61,13 @@ class FilterBar extends StatelessWidget {
                                   : () => _showFilterOverlay(
                                       context: context,
                                       theme: theme,
-                                      menuBuilder: () => menuBuilder(button),
-                                      onRemoveFilters: () => onRemoveFilters?.call(button),
-                                      onCancelFilters: () => onCancelFilters?.call(button),
-                                      onApplyFilters: () => onApplyFilters?.call(button),
+                                      menuBuilder: button.menuBuilder,
+                                      onRemoveFilters: button.onRemoveFilters,
+                                      onCancelFilters: button.onCancelFilters,
+                                      onApplyFilters: button.onApplyFilters,
                                     ),
-                              tooltip: buttonTooltips[button],
-                              icon: Icon(buttonIcons[button]),
+                              tooltip: button.tooltip,
+                              icon: Icon(button.icon),
                             ),
                           ),
                         ],
@@ -196,35 +176,42 @@ class _FiltersDialog extends StatelessWidget {
       padding: const EdgeInsets.all(8),
       child: Row(
         children: [
-          TextButton(
-            style: TextButton.styleFrom(
-              foregroundColor: Theme.of(context).colorScheme.secondary,
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+          if (onRemoveFilters != null)
+            TextButton(
+              style: TextButton.styleFrom(
+                foregroundColor: Theme.of(context).colorScheme.secondary,
+                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+                onRemoveFilters?.call();
+              },
+              child: Text(localizations.removeAllFiltersButtonText),
             ),
-            onPressed: () {
-              Navigator.pop(context);
-              onRemoveFilters?.call();
-            },
-            child: Text(localizations.removeAllFiltersButtonText),
-          ),
+
           const Spacer(),
-          TextButton(
-            style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20)),
-            onPressed: () {
-              Navigator.pop(context);
-              onCancelFilters?.call();
-            },
-            child: Text(localizations.cancelFilteringButtonText),
-          ),
-          const SizedBox(width: 10),
-          FilledButton(
-            style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20)),
-            onPressed: () {
-              Navigator.pop(context);
-              onApplyFilters?.call();
-            },
-            child: Text(localizations.applyFilterButtonText),
-          ),
+
+          if (onCancelFilters != null)
+            TextButton(
+              style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20)),
+              onPressed: () {
+                Navigator.pop(context);
+                onCancelFilters?.call();
+              },
+              child: Text(localizations.cancelFilteringButtonText),
+            ),
+
+          if (onCancelFilters != null) ...[
+            const SizedBox(width: 10),
+            FilledButton(
+              style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20)),
+              onPressed: () {
+                Navigator.pop(context);
+                onApplyFilters?.call();
+              },
+              child: Text(localizations.applyFilterButtonText),
+            ),
+          ],
         ],
       ),
     );

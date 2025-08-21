@@ -15,6 +15,7 @@ part 'controller.dart';
 part 'double_list_rows.dart';
 part 'filter.dart';
 part 'filter_bar.dart';
+part 'filter_bar_menu_button.dart';
 part 'filter_model.dart';
 part 'filter_state.dart';
 part 'filter_widgets.dart';
