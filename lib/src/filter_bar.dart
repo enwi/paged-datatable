@@ -98,7 +98,7 @@ class FilterBar extends StatelessWidget {
   Future<void> _showFilterOverlay({
     required final BuildContext context,
     required final FilterBarThemeData theme,
-    required final Widget Function() menuBuilder,
+    required final Widget Function(BuildContext context) menuBuilder,
     final void Function()? onRemoveFilters,
     final void Function()? onCancelFilters,
     final void Function()? onApplyFilters,
@@ -146,7 +146,7 @@ class FilterBar extends StatelessWidget {
 
 class _FiltersDialog extends StatelessWidget {
   final FilterBarThemeData theme;
-  final Widget Function() menuBuilder;
+  final Widget Function(BuildContext context) menuBuilder;
   final void Function()? onRemoveFilters;
   final void Function()? onCancelFilters;
   final void Function()? onApplyFilters;
@@ -169,7 +169,7 @@ class _FiltersDialog extends StatelessWidget {
 
     Widget filtersList = Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8.0),
-      child: menuBuilder.call(),
+      child: menuBuilder.call(context),
     );
 
     final buttons = Padding(

@@ -18,7 +18,7 @@ class FilterBarMenuButton {
   final void Function()? onApplyFilters;
 
   /// Filter bar menu button menu builder
-  final Widget Function() menuBuilder;
+  final Widget Function(BuildContext context) menuBuilder;
 
   FilterBarMenuButton({
     required this.icon,

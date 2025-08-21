@@ -25,7 +25,7 @@ class TableFilterBar<K extends Comparable<K>, T> extends StatelessWidget {
             controller._filtersFormKey.currentState!.save();
             controller.applyFilters();
           },
-          menuBuilder: () => Form(
+          menuBuilder: (context) => Form(
             key: controller._filtersFormKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
