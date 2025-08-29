@@ -62,6 +62,9 @@ final class PagedDataTable<K extends Comparable<K>, T> extends StatefulWidget {
   /// If null, the default footer will be displayed.
   final Widget? footer;
 
+  /// Alternative filter bar widget.
+  final Widget? filterBar;
+
   /// Additional widget to add at the right of the filter bar.
   final Widget? filterBarChild;
 
@@ -78,6 +81,7 @@ final class PagedDataTable<K extends Comparable<K>, T> extends StatefulWidget {
     this.fixedColumnCount = 0,
     this.configuration = const PagedDataTableConfiguration(),
     this.footer,
+    this.filterBar,
     this.filterBarChild,
     this.filters = const <TableFilter>[],
     super.key,
@@ -147,7 +151,10 @@ final class _PagedDataTableState<K extends Comparable<K>, T> extends State<Paged
 
             return Column(
               children: [
-                TableFilterBar<K, T>(trailing: widget.filterBarChild),
+                if (widget.filterBar != null)
+                  widget.filterBar!
+                else
+                  TableFilterBar<K, T>(trailing: widget.filterBarChild),
 
                 _Header(
                   controller: tableController,
