@@ -201,7 +201,7 @@ class _FiltersDialog extends StatelessWidget {
               child: Text(localizations.cancelFilteringButtonText),
             ),
 
-          if (onCancelFilters != null) ...[
+          if (onApplyFilters != null) ...[
             const SizedBox(width: 10),
             FilledButton(
               style: FilledButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20)),
@@ -225,7 +225,13 @@ class _FiltersDialog extends StatelessWidget {
       elevation: 0,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [filtersList, const Divider(height: 0), buttons],
+        children: [
+          filtersList,
+          if (onRemoveFilters != null || onCancelFilters != null || onApplyFilters != null) ...[
+            const Divider(height: 0),
+            buttons,
+          ],
+        ],
       ),
     );
 
