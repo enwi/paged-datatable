@@ -16,7 +16,7 @@ class TableFilterBar<K extends Comparable<K>, T> extends StatelessWidget {
       theme: theme,
       menuButtons: [
         FilterBarMenuButton(
-          icon: Icons.filter_list_rounded,
+          icon: Icon(Icons.filter_list_rounded),
           tooltip: localizations.showFilterMenuTooltip,
           onRemoveFilters: () => controller.removeFilters(),
           onCancelFilters: () {},

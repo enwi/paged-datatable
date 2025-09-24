@@ -3,7 +3,7 @@ part of 'paged_datatable.dart';
 /// Filter bar menu button
 class FilterBarMenuButton {
   /// Filter bar menu button icon
-  final IconData icon;
+  final Icon icon;
 
   /// Filter bar menu button tool tip
   final String? tooltip;

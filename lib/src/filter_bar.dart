@@ -67,7 +67,7 @@ class FilterBar extends StatelessWidget {
                                       onApplyFilters: button.onApplyFilters,
                                     ),
                               tooltip: button.tooltip,
-                              icon: Icon(button.icon),
+                              icon: button.icon,
                             ),
                           ),
                         ],
