@@ -4,14 +4,38 @@ import 'dart:math' as math;
 sealed class ColumnSize {
   const ColumnSize();
 
-  /// A flag that indicates if the column defines a fixed, constant size.
-  bool get isFixed => false;
-
   /// Returns the size of the column as fractional units.
   double get fraction => 0.0;
 
   /// The function used to calculate the constraints for the column given the [availableWidth].
   double calculateConstraints(double availableWidth);
+
+  /// Returns the maximum fraction defined in this ColumnSize.
+  double maxFraction() {
+    return switch (this) {
+      FractionalColumnSize(:final fraction) => fraction,
+      MaxColumnSize(:final a, :final b) => math.max(a.maxFraction(), b.maxFraction()),
+      _ => 0.0,
+    };
+  }
+
+  /// Returns the maximum fixed width defined in this ColumnSize.
+  double maxFixedWidth() {
+    return switch (this) {
+      FixedColumnSize(:final size) => size,
+      MaxColumnSize(:final a, :final b) => math.max(a.maxFixedWidth(), b.maxFixedWidth()),
+      _ => 0.0,
+    };
+  }
+
+  /// Returns true if this ColumnSize or any nested ColumnSize includes a RemainingColumnSize.
+  bool includesRemaining() {
+    return switch (this) {
+      RemainingColumnSize() => true,
+      MaxColumnSize(:final a, :final b) => a.includesRemaining() || b.includesRemaining(),
+      _ => false,
+    };
+  }
 }
 
 /// Indicates a fixed size of a column. If the content of a cell does not fit, it will be wrapped
@@ -25,9 +49,6 @@ final class FixedColumnSize extends ColumnSize {
 
   @override
   bool operator ==(Object other) => other is FixedColumnSize && other.size == size;
-
-  @override
-  bool get isFixed => true;
 
   @override
   double calculateConstraints(double availableWidth) => size;
@@ -67,9 +88,6 @@ final class MaxColumnSize extends ColumnSize {
   final ColumnSize a, b;
 
   const MaxColumnSize(this.a, this.b);
-
-  @override
-  bool get isFixed => a.isFixed && b.isFixed;
 
   @override
   double get fraction => math.max(a.fraction, b.fraction);
