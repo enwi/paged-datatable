@@ -218,7 +218,7 @@ class _MainViewState extends State<MainView> {
                     ),
                     LargeTextTableColumn(
                       title: const Text("Content"),
-                      size: const RemainingColumnSize(),
+                      size: const MaxColumnSize(RemainingColumnSize(), FixedColumnSize(100)),
                       getter: (item, index) => item.content,
                       fieldLabel: "Content",
                       setter: (item, newValue, index) async {

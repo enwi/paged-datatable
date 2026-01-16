@@ -209,81 +209,94 @@ final class _PagedDataTableState<K extends Comparable<K>, T> extends State<Paged
     }
   }
 
+  /// Calculates the final width for each column given the available [maxWidth].
+  ///
+  /// Flow:
+  /// 1) Collect per-column sizing capabilities (fixed, fractional, remaining).
+  /// 2) Aggregate fixed and fractional totals, excluding Remaining columns.
+  /// 3) Iteratively promote Max(Fixed, Fractional) columns to Fixed when their
+  ///    fixed width would exceed the computed fractional width.
+  /// 4) Compute fractional widths, then assign remaining space to Remaining
+  ///    columns, honoring their own fixed/fractional constraints.
+  /// 5) Normalize any leftover width to avoid gaps due to rounding.
+  ///
+  /// The returned list length matches [widget.columns.length].
   List<double> _calculateColumnWidth(double maxWidth) {
     final sizes = List<double>.filled(widget.columns.length, 0.0, growable: false);
-
-    double maxFixedWidth(ColumnSize size) {
-      return switch (size) {
-        FixedColumnSize(:final size) => size,
-        MaxColumnSize(:final a, :final b) => math.max(maxFixedWidth(a), maxFixedWidth(b)),
-        _ => 0.0,
-      };
-    }
-
-    double maxFraction(ColumnSize size) {
-      return switch (size) {
-        FractionalColumnSize(:final fraction) => fraction,
-        MaxColumnSize(:final a, :final b) => math.max(maxFraction(a), maxFraction(b)),
-        _ => 0.0,
-      };
-    }
-
-    bool includesRemaining(ColumnSize size) {
-      return switch (size) {
-        RemainingColumnSize() => true,
-        MaxColumnSize(:final a, :final b) => includesRemaining(a) || includesRemaining(b),
-        _ => false,
-      };
-    }
 
     double totalFixedWidth = 0.0;
     double totalFraction = 0.0;
     int remainingColumnCount = 0;
-    double totalFractionalWidth = 0.0;
 
-    // First pass to determine widths and types of columns
+    final fractions = List<double>.filled(widget.columns.length, 0.0, growable: false);
+    final fixedWidths = List<double>.filled(widget.columns.length, 0.0, growable: false);
+    final hasRemaining = List<bool>.filled(widget.columns.length, false, growable: false);
+
+    // Pass 1: collect size characteristics per column and total fixed/fractional sizes.
     for (int i = 0; i < widget.columns.length; i++) {
-      final column = widget.columns[i];
-      final size = column.size;
-      final fixedWidth = maxFixedWidth(size);
-      final fraction = maxFraction(size);
-      final hasRemaining = includesRemaining(size);
+      final size = widget.columns[i].size;
+      final maxFraction = fractions[i] = size.maxFraction();
+      final fixedWidth = fixedWidths[i] = size.maxFixedWidth();
+      final includesRemaining = hasRemaining[i] = size.includesRemaining();
 
-      if (fixedWidth > 0.0) {
-        totalFixedWidth += fixedWidth;
-      }
-
-      if (fraction > 0.0 && !hasRemaining) {
-        totalFraction += fraction;
-      }
-
-      if (hasRemaining) {
+      // Only count non-Remaining columns here. Remaining columns are resolved later.
+      if (includesRemaining) {
         remainingColumnCount++;
+      } else if (maxFraction > 0.0) {
+        totalFraction += maxFraction;
+      } else if (fixedWidth > 0.0) {
+        totalFixedWidth += fixedWidth;
       }
     }
 
-    // Ensure totalFraction is within a valid range to prevent overflow
+    // Pass 2: iteratively convert Max(Fixed, Fractional) columns to Fixed if the
+    // fixed width is larger than their fractional allocation.
+    bool adjusted;
+    do {
+      adjusted = false;
+      if (totalFraction <= 0.0) break;
+
+      final remainingWidthAfterFixed = math.max(0.0, maxWidth - totalFixedWidth);
+
+      for (int i = 0; i < widget.columns.length; i++) {
+        if (hasRemaining[i]) continue;
+        final fraction = fractions[i];
+        final fixedWidth = fixedWidths[i];
+
+        if (fraction <= 0.0 || fixedWidth <= 0.0) continue;
+
+        final fractionalWidth = remainingWidthAfterFixed * fraction / totalFraction;
+
+        if (fixedWidth > fractionalWidth) {
+          adjusted = true;
+          totalFraction -= fraction;
+          fractions[i] = 0.0;
+          totalFixedWidth += fixedWidth;
+        }
+      }
+    } while (adjusted);
+
+    // Ensure totalFraction is within a valid range to prevent overflow.
     assert(totalFraction <= 1.0, "Total fraction exceeds 1.0, which means the columns will overflow.");
 
-    // Calculate remaining width after fixed sizes are allocated
-    final remainingWidthAfterFixed = maxWidth - totalFixedWidth;
-    // Re-calculate total fractional width
-    totalFractionalWidth = remainingWidthAfterFixed * totalFraction;
-    // Adjust remaining width to exclude fractional columns' widths for RemainingColumnSize
-    double remainingWidth = remainingWidthAfterFixed - totalFractionalWidth;
+    // Remaining width after fixed sizes are allocated.
+    final remainingWidthAfterFixed = math.max(0.0, maxWidth - totalFixedWidth);
+    // Total width reserved for fractional columns.
+    final totalFractionalWidth = remainingWidthAfterFixed * totalFraction;
+    // Width left for Remaining columns after fractional allocation.
+    final remainingWidth = math.max(0.0, remainingWidthAfterFixed - totalFractionalWidth);
     final remainingColumnWidth = remainingColumnCount > 0.0 ? remainingWidth / remainingColumnCount : 0.0;
 
-    // Now calculate and assign column sizes
+    // Pass 3: assign final sizes for each column.
     for (int i = 0; i < widget.columns.length; i++) {
-      final column = widget.columns[i];
-      final size = column.size;
-      final fixedWidth = maxFixedWidth(size);
-      final fraction = maxFraction(size);
+      final size = widget.columns[i].size;
+      final fixedWidth = fixedWidths[i];
+      final fraction = fractions[i];
 
-      if (includesRemaining(size)) {
+      if (hasRemaining[i]) {
         double resolvedSize = remainingColumnWidth;
         if (fraction > 0.0) {
-          final fractionalWidth = remainingWidthAfterFixed * fraction;
+          final fractionalWidth = remainingWidth * fraction;
           resolvedSize = math.max(resolvedSize, fractionalWidth);
         }
         if (fixedWidth > 0.0) {
@@ -298,6 +311,31 @@ final class _PagedDataTableState<K extends Comparable<K>, T> extends State<Paged
       } else {
         // Fallback to size constraints for any other custom type.
         sizes[i] = size.calculateConstraints(totalFixedWidth);
+      }
+    }
+
+    // Pass 4: normalize widths to consume all available space and avoid gaps.
+    const epsilon = 0.01;
+    double totalWidth = 0.0;
+    for (final width in sizes) {
+      totalWidth += width;
+    }
+    final delta = maxWidth - totalWidth;
+    if (delta > epsilon) {
+      final flexibleIndices = <int>[];
+      for (int i = 0; i < widget.columns.length; i++) {
+        if (hasRemaining[i] || fractions[i] > 0.0) {
+          flexibleIndices.add(i);
+        }
+      }
+
+      if (flexibleIndices.isNotEmpty) {
+        final perColumn = delta / flexibleIndices.length;
+        for (final index in flexibleIndices) {
+          sizes[index] = math.max(0.0, sizes[index] + perColumn);
+        }
+      } else if (sizes.isNotEmpty) {
+        sizes[sizes.length - 1] = math.max(0.0, sizes.last + delta);
       }
     }
 
