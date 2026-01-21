@@ -351,7 +351,8 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends FilterB
 
   /// Initializes the controller filling up properties
   void init({
-    required List<ReadOnlyTableColumn> columns,
+    required List<ReadOnlyTableColumn>? columns,
+    required Widget Function(BuildContext context, T item, int rowIndex)? rowBuilder,
     required List<int>? pageSizes,
     required int initialPageSize,
     required Fetcher<K, T> fetcher,
@@ -360,7 +361,14 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends FilterB
   }) {
     if (_configuration != null) return;
 
-    assert(columns.isNotEmpty, "columns cannot be empty.");
+    assert(columns != null || rowBuilder != null, "One of columns or rowBuilder must be specified");
+    assert(
+      !(columns != null && rowBuilder != null),
+      "columns and rowBuilder must not both be specified at the same time",
+    );
+    if (columns != null) {
+      assert(columns.isNotEmpty, "columns cannot be empty.");
+    }
 
     _currentPageSize = initialPageSize;
     _pageSizes = pageSizes;

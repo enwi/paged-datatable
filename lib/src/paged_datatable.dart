@@ -26,6 +26,7 @@ part 'row.dart';
 part 'sort_model.dart';
 part 'table_view_rows.dart';
 part 'table_filter_bar.dart';
+part 'simple_row_list.dart';
 
 /// [PagedDataTable] renders a table of items that is paginable.
 ///
@@ -36,7 +37,10 @@ final class PagedDataTable<K extends Comparable<K>, T> extends StatefulWidget {
   final PagedDataTableController<K, T>? controller;
 
   /// The list of columns to draw in the table.
-  final List<ReadOnlyTableColumn<K, T>> columns;
+  final List<ReadOnlyTableColumn<K, T>>? columns;
+
+  /// Optional row builder, to provide custom row formatting if a raw table view is undesirable
+  final Widget Function(BuildContext context, T item, int rowIndex)? rowBuilder;
 
   /// The initial page size of the table.
   ///
@@ -73,7 +77,8 @@ final class PagedDataTable<K extends Comparable<K>, T> extends StatefulWidget {
   final List<TableFilter> filters;
 
   const PagedDataTable({
-    required this.columns,
+    this.columns,
+    this.rowBuilder,
     required this.fetcher,
     this.initialPage,
     this.initialPageSize = 50,
@@ -117,6 +122,7 @@ final class _PagedDataTableState<K extends Comparable<K>, T> extends State<Paged
     }
     tableController.init(
       columns: widget.columns,
+      rowBuilder: widget.rowBuilder,
       pageSizes: widget.pageSizes,
       initialPageSize: widget.initialPageSize,
       fetcher: widget.fetcher,
@@ -129,8 +135,10 @@ final class _PagedDataTableState<K extends Comparable<K>, T> extends State<Paged
   void didUpdateWidget(covariant PagedDataTable<K, T> oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    if (oldWidget.columns.length != widget.columns.length /*!listEquals(oldWidget.columns, widget.columns)*/ ) {
-      tableController._reset(columns: widget.columns);
+    if (widget.columns != null &&
+        (oldWidget.columns?.length ?? -1) !=
+            widget.columns!.length /*!listEquals(oldWidget.columns, widget.columns)*/ ) {
+      tableController._reset(columns: widget.columns!);
       debugPrint("PagedDataTable<$T> changed and rebuilt.");
     }
   }
@@ -157,26 +165,32 @@ final class _PagedDataTableState<K extends Comparable<K>, T> extends State<Paged
                 else
                   TableFilterBar<K, T>(trailing: widget.filterBarChild),
 
-                _Header(
-                  controller: tableController,
-                  configuration: widget.configuration,
-                  columns: widget.columns,
-                  sizes: sizes,
-                  fixedColumnCount: widget.fixedColumnCount,
-                  horizontalController: headerHorizontalController,
-                ),
-                const Divider(height: 0),
-
-                Expanded(
-                  child: _DoubleListRows(
-                    fixedColumnCount: widget.fixedColumnCount,
-                    columns: widget.columns,
-                    horizontalController: horizontalController,
+                if (widget.columns != null) ...[
+                  _Header(
                     controller: tableController,
                     configuration: widget.configuration,
+                    columns: widget.columns!,
                     sizes: sizes,
+                    fixedColumnCount: widget.fixedColumnCount,
+                    horizontalController: headerHorizontalController,
                   ),
-                ),
+                  const Divider(height: 0),
+
+                  Expanded(
+                    child: _DoubleListRows(
+                      fixedColumnCount: widget.fixedColumnCount,
+                      columns: widget.columns!,
+                      horizontalController: horizontalController,
+                      controller: tableController,
+                      configuration: widget.configuration,
+                      sizes: sizes,
+                    ),
+                  ),
+                ] else ...[
+                  Expanded(
+                    child: _SimpleRowList<K, T>(controller: tableController, builder: widget.rowBuilder!),
+                  ),
+                ],
 
                 // Expanded(
                 //   child: _TableViewRows<T>(
@@ -222,19 +236,23 @@ final class _PagedDataTableState<K extends Comparable<K>, T> extends State<Paged
   ///
   /// The returned list length matches [widget.columns.length].
   List<double> _calculateColumnWidth(double maxWidth) {
-    final sizes = List<double>.filled(widget.columns.length, 0.0, growable: false);
+    if (widget.columns == null) {
+      return [];
+    }
+
+    final sizes = List<double>.filled(widget.columns!.length, 0.0, growable: false);
 
     double totalFixedWidth = 0.0;
     double totalFraction = 0.0;
     int remainingColumnCount = 0;
 
-    final fractions = List<double>.filled(widget.columns.length, 0.0, growable: false);
-    final fixedWidths = List<double>.filled(widget.columns.length, 0.0, growable: false);
-    final hasRemaining = List<bool>.filled(widget.columns.length, false, growable: false);
+    final fractions = List<double>.filled(widget.columns!.length, 0.0, growable: false);
+    final fixedWidths = List<double>.filled(widget.columns!.length, 0.0, growable: false);
+    final hasRemaining = List<bool>.filled(widget.columns!.length, false, growable: false);
 
     // Pass 1: collect size characteristics per column and total fixed/fractional sizes.
-    for (int i = 0; i < widget.columns.length; i++) {
-      final size = widget.columns[i].size;
+    for (int i = 0; i < widget.columns!.length; i++) {
+      final size = widget.columns![i].size;
       final maxFraction = fractions[i] = size.maxFraction();
       final fixedWidth = fixedWidths[i] = size.maxFixedWidth();
       final includesRemaining = hasRemaining[i] = size.includesRemaining();
@@ -258,7 +276,7 @@ final class _PagedDataTableState<K extends Comparable<K>, T> extends State<Paged
 
       final remainingWidthAfterFixed = math.max(0.0, maxWidth - totalFixedWidth);
 
-      for (int i = 0; i < widget.columns.length; i++) {
+      for (int i = 0; i < widget.columns!.length; i++) {
         if (hasRemaining[i]) continue;
         final fraction = fractions[i];
         final fixedWidth = fixedWidths[i];
@@ -290,8 +308,8 @@ final class _PagedDataTableState<K extends Comparable<K>, T> extends State<Paged
     const epsilon = 0.01;
 
     // Pass 3: assign final sizes for each column.
-    for (int i = 0; i < widget.columns.length; i++) {
-      final size = widget.columns[i].size;
+    for (int i = 0; i < widget.columns!.length; i++) {
+      final size = widget.columns![i].size;
       final fixedWidth = fixedWidths[i];
       final fraction = fractions[i];
 
@@ -326,7 +344,7 @@ final class _PagedDataTableState<K extends Comparable<K>, T> extends State<Paged
     final delta = maxWidth - totalWidth;
     if (delta > epsilon) {
       final remainingIndices = <int>[];
-      for (int i = 0; i < widget.columns.length; i++) {
+      for (int i = 0; i < widget.columns!.length; i++) {
         if (hasRemaining[i]) {
           remainingIndices.add(i);
         }

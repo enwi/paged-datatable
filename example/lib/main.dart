@@ -241,6 +241,17 @@ class _MainViewState extends State<MainView> {
                       },
                     ),
                   ],
+                  // rowBuilder: (context, item, rowIndex) {
+                  //   return Card.filled(
+                  //     child: ListTile(
+                  //       title: Text(item.author),
+                  //       leading: Switch(
+                  //         onChanged: null,
+                  //         value: item.isEnabled,
+                  //       ),
+                  //     ),
+                  //   ) as Widget;
+                  // },
                 ),
               ),
             ),
