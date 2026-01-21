@@ -14,24 +14,51 @@ class _SimpleRowListState<K extends Comparable<K>, T> extends State<_SimpleRowLi
   final scrollController = ScrollController();
 
   @override
+  void initState() {
+    super.initState();
+
+    widget.controller.addListener(rebuildUi);
+  }
+
+  @override
+  void dispose() {
+    widget.controller.removeListener(rebuildUi);
+
+    super.dispose();
+  }
+
+  void rebuildUi() {
+    setState(() {});
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = PagedDataTableTheme.of(context);
 
-    return ScrollConfiguration(
-      behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
-      child: Opacity(
-        opacity: widget.controller.isIdle() ? 1 : 0.5,
-        child: Scrollbar(
-          controller: scrollController,
-          thumbVisibility: theme.verticalScrollbarVisibility,
-          child: ListView.separated(
-            controller: scrollController,
-            itemCount: widget.controller._totalItems,
-            itemBuilder: (context, index) => widget.builder(context, widget.controller._currentDataset[index], index),
-            separatorBuilder: (context, index) => const SizedBox(height: 4.0),
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (widget.controller._state.isFetching()) const LinearProgressIndicator(),
+        Expanded(
+          child: ScrollConfiguration(
+            behavior: ScrollConfiguration.of(context).copyWith(scrollbars: false),
+            child: Opacity(
+              opacity: widget.controller.isIdle() ? 1 : 0.5,
+              child: Scrollbar(
+                controller: scrollController,
+                thumbVisibility: theme.verticalScrollbarVisibility,
+                child: ListView.separated(
+                  controller: scrollController,
+                  itemCount: widget.controller._totalItems,
+                  itemBuilder: (context, index) =>
+                      widget.builder(context, widget.controller._currentDataset[index], index),
+                  separatorBuilder: (context, index) => const SizedBox(height: 4.0),
+                ),
+              ),
+            ),
           ),
         ),
-      ),
+      ],
     );
   }
 }
