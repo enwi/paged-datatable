@@ -415,6 +415,10 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends FilterB
         items = items.toList();
       }
 
+      if (_configuration!.reverse) {
+        items = items.reversed.toList(growable: false);
+      }
+
       /* the following may be more efficient than clearing the list and adding items again */
 
       _currentDataset.clear();

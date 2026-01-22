@@ -34,6 +34,7 @@ class _SimpleRowListState<K extends Comparable<K>, T> extends State<_SimpleRowLi
   @override
   Widget build(BuildContext context) {
     final theme = PagedDataTableTheme.of(context);
+    final reverse = widget.controller._configuration?.reverse ?? false;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -49,6 +50,7 @@ class _SimpleRowListState<K extends Comparable<K>, T> extends State<_SimpleRowLi
                 thumbVisibility: theme.verticalScrollbarVisibility,
                 child: ListView.separated(
                   controller: scrollController,
+                  reverse: reverse,
                   itemCount: widget.controller._totalItems,
                   itemBuilder: (context, index) =>
                       widget.builder(context, widget.controller._currentDataset[index], index),

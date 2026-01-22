@@ -63,6 +63,7 @@ class _DoubleListRowsState<K extends Comparable<K>, T> extends State<_DoubleList
                   child: ListView.separated(
                     primary: false,
                     controller: fixedController,
+                    reverse: widget.configuration.reverse,
                     itemCount: widget.controller._totalItems,
                     separatorBuilder: (_, _) => const Divider(height: 0),
                     itemBuilder: (context, index) => _FixedPartRow<K, T>(
@@ -87,6 +88,7 @@ class _DoubleListRowsState<K extends Comparable<K>, T> extends State<_DoubleList
                           ),
                           child: ListView.separated(
                             controller: normalController,
+                            reverse: widget.configuration.reverse,
                             itemCount: widget.controller._totalItems,
                             separatorBuilder: (_, _) => const Divider(height: 0),
                             itemBuilder: (context, index) => _VariablePartRow<K, T>(

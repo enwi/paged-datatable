@@ -6,5 +6,9 @@ final class PagedDataTableConfiguration {
   /// This is useful when you don't want to accidentally modify the returned list.
   final bool copyItems;
 
-  const PagedDataTableConfiguration({this.copyItems = false});
+  /// When true, the table renders the dataset in reverse order and reverses the
+  /// vertical scroll direction (defaulting the scroll position to the bottom).
+  final bool reverse;
+
+  const PagedDataTableConfiguration({this.copyItems = false, this.reverse = false});
 }
