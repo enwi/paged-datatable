@@ -496,12 +496,17 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends FilterB
   }
 
   Future<void> _fetch([int page = 0]) async {
+    final returnToState = switch (_state) {
+      TableState.idle || TableState.backgroundLoading => _state,
+      _ => TableState.idle,
+    };
+
     _state = TableState.fetching;
     _selectedRows.clear();
     notifyListeners();
 
     if (_fetcher == null) {
-      _state = TableState.idle;
+      _state = returnToState;
       notifyListeners();
       return;
     }
@@ -551,7 +556,7 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends FilterB
       // }
 
       _totalItems = items.length;
-      _state = TableState.idle;
+      _state = returnToState;
       _currentError = null;
       notifyListeners();
     } catch (err, stack) {
