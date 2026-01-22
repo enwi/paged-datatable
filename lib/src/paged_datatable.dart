@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 import 'dart:math' as math;
+import 'dart:ui' as ui;
 
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
@@ -101,7 +102,6 @@ final class _PagedDataTableState<K extends Comparable<K>, T> extends State<Paged
   final verticalController = ScrollController();
   final linkedControllers = LinkedScrollControllerGroup();
   late final headerHorizontalController = linkedControllers.addAndGet();
-  late final horizontalController = linkedControllers.addAndGet();
   late final PagedDataTableController<K, T> tableController;
   // late FixedTableSpanExtent rowSpanExtent, headerRowSpanExtent;
   bool selfConstructedController = false;
@@ -180,7 +180,7 @@ final class _PagedDataTableState<K extends Comparable<K>, T> extends State<Paged
                     child: _DoubleListRows(
                       fixedColumnCount: widget.fixedColumnCount,
                       columns: widget.columns!,
-                      horizontalController: horizontalController,
+                      linkedControllers: linkedControllers,
                       controller: tableController,
                       configuration: widget.configuration,
                       sizes: sizes,
@@ -215,7 +215,6 @@ final class _PagedDataTableState<K extends Comparable<K>, T> extends State<Paged
   void dispose() {
     super.dispose();
     verticalController.dispose();
-    horizontalController.dispose();
     headerHorizontalController.dispose();
 
     if (selfConstructedController) {

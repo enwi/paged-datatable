@@ -78,6 +78,7 @@ class _MainViewState extends State<MainView> {
                 data: PagedDataTableThemeData(
                   selectedRow: const Color(0xFFCE93D8),
                   rowColor: (index) => index.isEven ? Colors.purple[50] : null,
+                  horizontalScrollbarVisibility: true,
                 ),
                 child: PagedDataTable<String, Post>(
                   controller: tableController,
@@ -182,78 +183,84 @@ class _MainViewState extends State<MainView> {
                     ],
                   ),
                   fixedColumnCount: 2,
-                  // columns: [
-                  //   RowSelectorColumn(),
-                  //   TableColumn(
-                  //     title: const Text("Id"),
-                  //     cellBuilder: (context, item, index) => Text(item.id.toString()),
-                  //     size: const FixedColumnSize(100),
-                  //   ),
-                  //   TableColumn(
-                  //     title: const Text("Author"),
-                  //     cellBuilder: (context, item, index) => Text(item.author),
-                  //     sortable: true,
-                  //     id: "author",
-                  //     size: const FractionalColumnSize(.15),
-                  //   ),
-                  //   DropdownTableColumn(
-                  //     title: const Text("Enabled"),
-                  //     // cellBuilder: (context, item, index) => Text(item.isEnabled ? "Yes" : "No"),
-                  //     items: const <DropdownMenuItem<bool>>[
-                  //       DropdownMenuItem(value: true, child: Text("Yes")),
-                  //       DropdownMenuItem(value: false, child: Text("No")),
-                  //     ],
-                  //     size: const FixedColumnSize(100),
-                  //     getter: (item, index) => item.isEnabled,
-                  //     setter: (item, newValue, index) async {
-                  //       await Future.delayed(const Duration(seconds: 2));
-                  //       item.isEnabled = newValue;
-                  //       return true;
-                  //     },
-                  //   ),
-                  //   TableColumn(
-                  //     title: const Text("Author Gender"),
-                  //     cellBuilder: (context, item, index) => Text(item.authorGender.name),
-                  //     sortable: true,
-                  //     id: "authorGender",
-                  //     size: const MaxColumnSize(FractionalColumnSize(.2), FixedColumnSize(100)),
-                  //   ),
-                  //   LargeTextTableColumn(
-                  //     title: const Text("Content"),
-                  //     size: const MaxColumnSize(RemainingColumnSize(), FixedColumnSize(100)),
-                  //     getter: (item, index) => item.content,
-                  //     fieldLabel: "Content",
-                  //     setter: (item, newValue, index) async {
-                  //       await Future.delayed(const Duration(seconds: 2));
-                  //       item.content = newValue;
-                  //       return true;
-                  //     },
-                  //   ),
-                  //   TextTableColumn(
-                  //     title: const Text("Number"),
-                  //     format: const NumericColumnFormat(),
-                  //     // cellBuilder: (context, item, index) => Text(item.number.toString()),
-                  //     size: const MaxColumnSize(FixedColumnSize(100), FractionalColumnSize(.1)),
-                  //     getter: (item, index) => item.number.toString(),
-                  //     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  //     setter: (item, newValue, index) async {
-                  //       await Future.delayed(const Duration(seconds: 2));
-                  //       item.number = int.parse(newValue);
-                  //       return true;
-                  //     },
-                  //   ),
-                  // ],
-                  rowBuilder: (context, item, rowIndex) {
-                    return Card.filled(
-                      child: ListTile(
-                        title: Text(item.author),
-                        leading: Switch(
-                          onChanged: null,
-                          value: item.isEnabled,
-                        ),
-                      ),
-                    ) as Widget;
-                  },
+                  columns: [
+                    RowSelectorColumn(),
+                    TableColumn(
+                      title: const Text("Id"),
+                      cellBuilder: (context, item, index) => Text(item.id.toString()),
+                      size: const FixedColumnSize(100),
+                    ),
+                    TableColumn(
+                      title: const Text("Author"),
+                      cellBuilder: (context, item, index) => Text(item.author),
+                      sortable: true,
+                      id: "author",
+                      // size: const FractionalColumnSize(.15),
+                      size: const FixedColumnSize(150),
+                    ),
+                    DropdownTableColumn(
+                      title: const Text("Enabled"),
+                      // cellBuilder: (context, item, index) => Text(item.isEnabled ? "Yes" : "No"),
+                      items: const <DropdownMenuItem<bool>>[
+                        DropdownMenuItem(value: true, child: Text("Yes")),
+                        DropdownMenuItem(value: false, child: Text("No")),
+                      ],
+                      size: const FixedColumnSize(100),
+                      getter: (item, index) => item.isEnabled,
+                      setter: (item, newValue, index) async {
+                        await Future.delayed(const Duration(seconds: 2));
+                        item.isEnabled = newValue;
+                        return true;
+                      },
+                    ),
+                    TableColumn(
+                      title: const Text("Author Gender"),
+                      cellBuilder: (context, item, index) => Text(item.authorGender.name),
+                      sortable: true,
+                      id: "authorGender",
+                      // size: const MaxColumnSize(FractionalColumnSize(.2), FixedColumnSize(100)),
+                      size: const FixedColumnSize(150),
+                    ),
+                    LargeTextTableColumn(
+                      showTooltip: false,
+                      title: const Text("Content"),
+                      // size: const MaxColumnSize(RemainingColumnSize(), FixedColumnSize(100)),
+                      size: const FixedColumnSize(1500),
+                      getter: (item, index) => item.content,
+                      fieldLabel: "Content",
+                      wrapText: true,
+                      setter: (item, newValue, index) async {
+                        await Future.delayed(const Duration(seconds: 2));
+                        item.content = newValue;
+                        return true;
+                      },
+                    ),
+                    TextTableColumn(
+                      title: const Text("Number"),
+                      format: const NumericColumnFormat(),
+                      // cellBuilder: (context, item, index) => Text(item.number.toString()),
+                      // size: const MaxColumnSize(FixedColumnSize(100), FractionalColumnSize(.1)),
+                      size: const FixedColumnSize(150),
+                      getter: (item, index) => item.number.toString(),
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      setter: (item, newValue, index) async {
+                        await Future.delayed(const Duration(seconds: 2));
+                        item.number = int.parse(newValue);
+                        return true;
+                      },
+                    ),
+                  ],
+                  // rowBuilder: (context, item, rowIndex) {
+                  //   return Card.filled(
+                  //     child: ListTile(
+                  //       title: Text(item.author),
+                  //       leading: Switch(
+                  //         onChanged: null,
+                  //         value: item.isEnabled,
+                  //       ),
+                  //     ),
+                  //   ) as Widget;
+                  // },
                 ),
               ),
             ),

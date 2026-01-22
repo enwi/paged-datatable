@@ -241,6 +241,7 @@ final class _LargeTextFieldCell<T> extends StatefulWidget {
   final BoxConstraints? tooltipConstraints;
   final TextStyle tooltipStyle;
   final double bottomSheetBreakpoint;
+  final bool wrapText;
 
   const _LargeTextFieldCell({
     required this.getter,
@@ -256,6 +257,7 @@ final class _LargeTextFieldCell<T> extends StatefulWidget {
     required this.tooltipStyle,
     required this.tooltipConstraints,
     required this.bottomSheetBreakpoint,
+    this.wrapText = false,
     super.key,
   });
 
@@ -368,7 +370,19 @@ final class _LargeTextFieldCellState<T> extends State<_LargeTextFieldCell<T>> {
                         child: Text(textController.text, style: widget.tooltipStyle),
                       ),
                     ),
-                    child: Text(textController.text, overflow: TextOverflow.ellipsis),
+                    child: widget.wrapText
+                        ? Text(
+                            textController.text,
+                            softWrap: true,
+                            style: DefaultTextStyle.of(context).style.copyWith(overflow: TextOverflow.visible),
+                          )
+                        : Text(textController.text, overflow: TextOverflow.ellipsis),
+                  )
+                : widget.wrapText
+                ? Text(
+                    textController.text,
+                    softWrap: true,
+                    style: DefaultTextStyle.of(context).style.copyWith(overflow: TextOverflow.visible),
                   )
                 : Text(textController.text, overflow: TextOverflow.ellipsis)),
     );

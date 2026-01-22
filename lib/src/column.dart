@@ -36,6 +36,14 @@ abstract class ReadOnlyTableColumn<K extends Comparable<K>, T> {
   /// Builds the cell for [item] at [index].
   Widget build(BuildContext context, T item, int index);
 
+  /// Whether this column requires dynamic row height calculation.
+  bool get requiresDynamicHeight => false;
+
+  /// Calculates the height needed for the cell content.
+  /// Returns null if the column doesn't support dynamic height calculation.
+  double? calculateCellHeight(BuildContext context, T item, int index, double availableWidth, TextStyle textStyle) =>
+      null;
+
   @override
   int get hashCode => Object.hash(id, size, title, format);
 
@@ -105,9 +113,11 @@ final class TableColumn<K extends Comparable<K>, T> extends ReadOnlyTableColumn<
 final class DropdownTableColumn<K extends Comparable<K>, T, V> extends EditableTableColumn<K, T, V> {
   final InputDecoration inputDecoration;
   final List<DropdownMenuItem<V>> items;
+  final EdgeInsets padding;
 
   const DropdownTableColumn({
     required super.title,
+    this.padding = EdgeInsets.zero,
     super.id,
     super.size = const FractionalColumnSize(.1),
     super.format = const AlignColumnFormat(alignment: Alignment.centerLeft),
@@ -120,14 +130,17 @@ final class DropdownTableColumn<K extends Comparable<K>, T, V> extends EditableT
   });
 
   @override
-  Widget build(BuildContext context, T item, int index) => _DropdownCell<T, V>(
-    getter: getter,
-    setter: setter,
-    index: index,
-    item: item,
-    items: items,
-    inputDecoration: inputDecoration,
-    key: ValueKey(item),
+  Widget build(BuildContext context, T item, int index) => Padding(
+    padding: padding,
+    child: _DropdownCell<T, V>(
+      getter: getter,
+      setter: setter,
+      index: index,
+      item: item,
+      items: items,
+      inputDecoration: inputDecoration,
+      key: ValueKey(item),
+    ),
   );
 }
 
@@ -187,6 +200,10 @@ final class LargeTextTableColumn<K extends Comparable<K>, T> extends EditableTab
   /// The width breakpoint that [PagedDataTable] uses to decide if will render an overlay or a bottom sheet when the field is edited.
   final double bottomSheetBreakpoint;
 
+  /// Whether the text should wrap to multiple lines.
+  /// When true, the row height will expand to fit the content.
+  final bool wrapText;
+
   const LargeTextTableColumn({
     required super.title,
     super.id,
@@ -204,7 +221,30 @@ final class LargeTextTableColumn<K extends Comparable<K>, T> extends EditableTab
     this.tooltipStyle = const TextStyle(color: Colors.white),
     this.tooltipConstraints,
     this.bottomSheetBreakpoint = 1000,
+    this.wrapText = false,
   });
+
+  @override
+  bool get requiresDynamicHeight => wrapText;
+
+  @override
+  double? calculateCellHeight(BuildContext context, T item, int index, double availableWidth, TextStyle textStyle) {
+    if (!wrapText) return null;
+
+    final text = getter(item, index) ?? '';
+    if (text.isEmpty) return null;
+
+    // Use a style without overflow for accurate multi-line height calculation
+    final effectiveStyle = textStyle.copyWith(overflow: TextOverflow.visible);
+
+    final textPainter = TextPainter(
+      text: TextSpan(text: text, style: effectiveStyle),
+      maxLines: null,
+      textDirection: Directionality.of(context),
+    )..layout(maxWidth: availableWidth);
+
+    return textPainter.height;
+  }
 
   @override
   Widget build(BuildContext context, T item, int index) => _LargeTextFieldCell<T>(
@@ -222,15 +262,15 @@ final class LargeTextTableColumn<K extends Comparable<K>, T> extends EditableTab
     tooltipStyle: tooltipStyle,
     tooltipConstraints: tooltipConstraints,
     bottomSheetBreakpoint: bottomSheetBreakpoint,
+    wrapText: wrapText,
   );
 }
 
 /// A special [ReadOnlyTableColumn] that renders a checkbox used to select rows.
 final class RowSelectorColumn<K extends Comparable<K>, T> extends ReadOnlyTableColumn<K, T> {
   /// Creates a new [RowSelectorColumn].
-  RowSelectorColumn()
+  RowSelectorColumn({super.format = const AlignColumnFormat(alignment: Alignment.center)})
     : super(
-        format: const AlignColumnFormat(alignment: Alignment.center),
         id: null,
         size: const FixedColumnSize(80),
         sortable: false,
