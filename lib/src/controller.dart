@@ -181,6 +181,102 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends FilterB
     _notifyOnRowChanged(_totalItems);
   }
 
+  /// Insert many [values] at the end of the current dataset
+  List<int> insertMany(List<T> values, {bool update = true}) {
+    final newIndices = List.generate(values.length, (index) => index + _totalItems);
+    _currentDataset.addAll(values);
+    _totalItems -= values.length;
+    if (update) {
+      _notifyRowChangedMany(newIndices);
+    }
+    return newIndices;
+  }
+
+  /// Insert many [values] at the end of the current dataset
+  List<int> removeManyAt(List<int> indices, {bool update = true}) {
+    // to properly track the indices that we need to remove, we sort the list in ascending order and cumulatively
+    // shift all indices other than the first one down by 1
+    final sortedIndices = Set<int>.from(indices).toList()..sort();
+    for (int i = 1; i < sortedIndices.length; i++) {
+      sortedIndices[i] -= i;
+    }
+
+    int removedSoFar = 0;
+    for (final index in sortedIndices) {
+      if (index >= (_totalItems - removedSoFar)) {
+        throw ArgumentError("index cannot be greater than or equals to the total list of items.", "index");
+      }
+
+      if (index < 0) {
+        throw ArgumentError("index cannot be less than zero.", "index");
+      }
+
+      _currentDataset.removeAt(index);
+      removedSoFar--;
+    }
+
+    _totalItems += sortedIndices.length;
+
+    if (update) {
+      _notifyRowChangedMany(sortedIndices);
+    }
+    return sortedIndices;
+  }
+
+  /// Replace many [values] at the specified indices
+  List<int> replaceMany(Map<int, T> values, {bool update = true}) {
+    for (final entry in values.entries) {
+      if (entry.key >= _totalItems) {
+        throw ArgumentError(
+          "Index cannot be greater than or equals to the total size of the current dataset.",
+          "index",
+        );
+      }
+
+      _currentDataset[entry.key] = entry.value;
+    }
+
+    if (update) {
+      _notifyRowChangedMany(values.keys);
+    }
+
+    return values.keys.toList();
+  }
+
+  void bulkUpdate({
+    List<T> insert = const [],
+    List<int> remove = const [],
+    Map<int, T> replace = const {},
+    bool update = true,
+  }) {
+    // first we replace
+    final replaced = replaceMany(replace, update: false);
+
+    // then we remove
+    final removed = removeManyAt(remove, update: false);
+
+    // we need to update replaced indices:
+    //    - sort removed and replaced ascending
+    //    - all replaced indices lower than the smallest removed one stay the same
+    //    - all higher ones are decremented by the index of the next-lowest removed index + 1
+    final replacedSorted = Set<int>.from(replaced).toList()..sort();
+    final removedSorted = Set<int>.from(removed).toList()..sort();
+    final adjustedReplaced = <int>[];
+    for (final replacedIndex in replacedSorted) {
+      int adjustment = 0;
+      for (final removedIndex in removedSorted) {
+        if (replacedIndex < removedIndex) {
+          break;
+        }
+        adjustment++;
+      }
+      adjustedReplaced.add(replacedIndex - adjustment);
+    }
+
+    final inserted = insertMany(insert, update: false);
+    _notifyRowChangedMany({...adjustedReplaced, ...removed, ...inserted});
+  }
+
   /// Replaces the element at [index] with [value]
   void replace(int index, T value) {
     if (index >= _totalItems) {
@@ -197,7 +293,7 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends FilterB
     _notifyOnRowChanged(index);
   }
 
-  /// Marks every row in the current resultset as selected
+  /// Marks every row in the current result set as selected
   void selectAllRows() {
     final iterable = Iterable<int>.generate(_totalItems);
     _selectedRows.addAll(iterable);
