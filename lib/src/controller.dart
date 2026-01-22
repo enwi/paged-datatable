@@ -25,6 +25,8 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends FilterB
 
   // The list of filters' states
   final Map<String, FilterState> _filtersState = {};
+  bool _hasAnyAppliedFilters = false;
+
   // it's a map because on not found map will return null, list will throw
   final Map<int, K> _paginationKeys = {};
   // The list of selected row indexes
@@ -375,6 +377,15 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends FilterB
     }
   }
 
+  bool tryRemoveFilter(String filterId, {bool apply = true}) {
+    try {
+      removeFilter(filterId, apply: apply);
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
   /// Removes all the set filters, changing their values to null.
   void removeFilters({bool apply = true}) {
     _filtersState.forEach((key, value) {
@@ -389,7 +400,7 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends FilterB
 
   /// Applies the current set filters
   void applyFilters() {
-    if (_filtersState.values.any((element) => element.value != null)) {
+    if (_filtersState.values.any((element) => element.value != null) || !_hasAnyAppliedFilters) {
       notifyListeners();
       _fetch();
     }
@@ -517,6 +528,8 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends FilterB
 
       var (items, nextPageToken) =
           await _fetcher?.call(_currentPageSize, sortModel, filterModel, pageToken) ?? (<T>[], null);
+
+      _hasAnyAppliedFilters = _filtersState.values.any((s) => s.value != null);
 
       _hasNextPage = nextPageToken != null;
       _currentPageIndex = page;
