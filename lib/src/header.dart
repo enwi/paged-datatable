@@ -60,7 +60,9 @@ final class _HeaderState<K extends Comparable<K>, T> extends State<_Header<K, T>
             ),
             Align(
               alignment: Alignment.bottomCenter,
-              child: tableState.isFetching() ? const LinearProgressIndicator() : const SizedBox.shrink(),
+              child: tableState.isFetching() || tableState.isBackgroundLoading()
+                  ? const LinearProgressIndicator()
+                  : const SizedBox.shrink(),
             ),
           ],
         ),
