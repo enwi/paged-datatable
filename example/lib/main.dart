@@ -234,6 +234,7 @@ class _MainViewState extends State<MainView> {
                         item.content = newValue;
                         return true;
                       },
+                      editable: false,
                     ),
                     TextTableColumn(
                       title: const Text("Number"),

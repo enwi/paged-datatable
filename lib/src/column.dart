@@ -204,6 +204,10 @@ final class LargeTextTableColumn<K extends Comparable<K>, T> extends EditableTab
   /// When true, the row height will expand to fit the content.
   final bool wrapText;
 
+  /// Whether the cell is editable via double-click.
+  /// When false, the cell will be read-only and double-clicking will not open the editor.
+  final bool editable;
+
   const LargeTextTableColumn({
     required super.title,
     super.id,
@@ -222,6 +226,7 @@ final class LargeTextTableColumn<K extends Comparable<K>, T> extends EditableTab
     this.tooltipConstraints,
     this.bottomSheetBreakpoint = 1000,
     this.wrapText = false,
+    this.editable = true,
   });
 
   @override
@@ -263,6 +268,7 @@ final class LargeTextTableColumn<K extends Comparable<K>, T> extends EditableTab
     tooltipConstraints: tooltipConstraints,
     bottomSheetBreakpoint: bottomSheetBreakpoint,
     wrapText: wrapText,
+    editable: editable,
   );
 }
 

@@ -242,6 +242,7 @@ final class _LargeTextFieldCell<T> extends StatefulWidget {
   final TextStyle tooltipStyle;
   final double bottomSheetBreakpoint;
   final bool wrapText;
+  final bool editable;
 
   const _LargeTextFieldCell({
     required this.getter,
@@ -258,6 +259,7 @@ final class _LargeTextFieldCell<T> extends StatefulWidget {
     required this.tooltipConstraints,
     required this.bottomSheetBreakpoint,
     this.wrapText = false,
+    this.editable = true,
     super.key,
   });
 
@@ -281,81 +283,83 @@ final class _LargeTextFieldCellState<T> extends State<_LargeTextFieldCell<T>> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onDoubleTap: () async {
-        final bool isBottomSheet = MediaQuery.of(context).size.width < widget.bottomSheetBreakpoint;
+      onDoubleTap: widget.editable
+          ? () async {
+              final bool isBottomSheet = MediaQuery.of(context).size.width < widget.bottomSheetBreakpoint;
 
-        String? newText;
+              String? newText;
 
-        if (isBottomSheet) {
-          newText = await showModalBottomSheet(
-            context: context,
-            builder: (context) => _EditableTextFieldBottomSheet(
-              value: textController.text,
-              validator: widget.validator,
-              decoration: widget.inputDecoration,
-              label: widget.label,
-              formatters: widget.inputFormatters,
-            ),
-          );
-        } else {
-          final RenderBox renderBox = context.findRenderObject() as RenderBox;
-          var offset = renderBox.localToGlobal(Offset.zero);
-          var availableSize = MediaQuery.of(context).size;
-          var drawWidth = availableSize.width / 3;
-          var drawHeight = availableSize.height / 3;
-          var size = renderBox.size;
+              if (isBottomSheet) {
+                newText = await showModalBottomSheet(
+                  context: context,
+                  builder: (context) => _EditableTextFieldBottomSheet(
+                    value: textController.text,
+                    validator: widget.validator,
+                    decoration: widget.inputDecoration,
+                    label: widget.label,
+                    formatters: widget.inputFormatters,
+                  ),
+                );
+              } else {
+                final RenderBox renderBox = context.findRenderObject() as RenderBox;
+                var offset = renderBox.localToGlobal(Offset.zero);
+                var availableSize = MediaQuery.of(context).size;
+                var drawWidth = availableSize.width / 3;
+                var drawHeight = availableSize.height / 3;
+                var size = renderBox.size;
 
-          double x, y;
-          if (offset.dx + drawWidth > availableSize.width) {
-            x = offset.dx - drawWidth + size.width;
-          } else {
-            x = offset.dx;
-          }
+                double x, y;
+                if (offset.dx + drawWidth > availableSize.width) {
+                  x = offset.dx - drawWidth + size.width;
+                } else {
+                  x = offset.dx;
+                }
 
-          if (offset.dy + drawHeight > availableSize.height) {
-            y = offset.dy - drawHeight - size.height;
-          } else {
-            y = offset.dy + size.height;
-          }
-          RelativeRect rect = RelativeRect.fromLTRB(x, y, 0, 0);
+                if (offset.dy + drawHeight > availableSize.height) {
+                  y = offset.dy - drawHeight - size.height;
+                } else {
+                  y = offset.dy + size.height;
+                }
+                RelativeRect rect = RelativeRect.fromLTRB(x, y, 0, 0);
 
-          newText = await showDialog(
-            context: context,
-            useSafeArea: true,
-            barrierColor: Colors.black.withValues(alpha: .3),
-            builder: (context) => _EditableTextFieldOverlay(
-              position: rect,
-              formatters: widget.inputFormatters,
-              value: textController.text,
-              width: drawWidth,
-              height: drawHeight,
-              validator: widget.validator,
-              decoration: widget.inputDecoration,
-              label: widget.label,
-            ),
-          );
-        }
+                newText = await showDialog(
+                  context: context,
+                  useSafeArea: true,
+                  barrierColor: Colors.black.withValues(alpha: .3),
+                  builder: (context) => _EditableTextFieldOverlay(
+                    position: rect,
+                    formatters: widget.inputFormatters,
+                    value: textController.text,
+                    width: drawWidth,
+                    height: drawHeight,
+                    validator: widget.validator,
+                    decoration: widget.inputDecoration,
+                    label: widget.label,
+                  ),
+                );
+              }
 
-        if (newText != null && newText != textController.text) {
-          if (context.mounted) {
-            setState(() {
-              isLoading = true;
-            });
-          }
+              if (newText != null && newText != textController.text) {
+                if (context.mounted) {
+                  setState(() {
+                    isLoading = true;
+                  });
+                }
 
-          if (await widget.setter(widget.item, newText, widget.index)) {
-            textController.text = newText;
-          } else {
-            textController.text = previousValue ?? '';
-          }
+                if (await widget.setter(widget.item, newText, widget.index)) {
+                  textController.text = newText;
+                } else {
+                  textController.text = previousValue ?? '';
+                }
 
-          if (context.mounted) {
-            setState(() {
-              isLoading = false;
-            });
-          }
-        }
-      },
+                if (context.mounted) {
+                  setState(() {
+                    isLoading = false;
+                  });
+                }
+              }
+            }
+          : null,
       child: isLoading
           ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator())
           : (widget.tooltipText
