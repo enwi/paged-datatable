@@ -16,6 +16,13 @@ typedef RowChangeListener<K extends Comparable<K>, T> = void Function(int index,
 final class PagedDataTableController<K extends Comparable<K>, T> extends FilterBarController {
   // the current dataset that is being displayed
   final List<T> _currentDataset = [];
+  T _tableRow(int index) {
+    if (_configuration?.reverse ?? false) {
+      return _currentDataset[_currentDataset.length - 1 - index];
+    }
+    return _currentDataset[index];
+  }
+
   // The list of filters' states
   final Map<String, FilterState> _filtersState = {};
   // it's a map because on not found map will return null, list will throw
@@ -509,10 +516,6 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends FilterB
 
       if (_configuration!.copyItems) {
         items = items.toList();
-      }
-
-      if (_configuration!.reverse) {
-        items = items.reversed.toList(growable: false);
       }
 
       /* the following may be more efficient than clearing the list and adding items again */

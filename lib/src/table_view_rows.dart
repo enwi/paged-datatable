@@ -66,7 +66,7 @@ class _TableViewRowsState<K extends Comparable<K>, T> extends State<_TableViewRo
   TableViewCell _buildCell(BuildContext context, TableVicinity vicinity) {
     final itemIndex = vicinity.row;
     final column = widget.columns[vicinity.column];
-    final item = widget.controller._currentDataset[itemIndex];
+    final item = widget.controller._tableRow(itemIndex);
 
     return TableViewCell(
       child: switch (column) {

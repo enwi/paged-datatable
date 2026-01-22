@@ -52,8 +52,7 @@ class _SimpleRowListState<K extends Comparable<K>, T> extends State<_SimpleRowLi
                   controller: scrollController,
                   reverse: reverse,
                   itemCount: widget.controller._totalItems,
-                  itemBuilder: (context, index) =>
-                      widget.builder(context, widget.controller._currentDataset[index], index),
+                  itemBuilder: (context, index) => widget.builder(context, widget.controller._tableRow(index), index),
                   separatorBuilder: (context, index) => const SizedBox(height: 4.0),
                 ),
               ),

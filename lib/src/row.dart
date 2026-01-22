@@ -84,7 +84,7 @@ class _FixedPartRow<K extends Comparable<K>, T> extends _RowBuilder<K, T> {
     PagedDataTableController<K, T> controller,
     PagedDataTableThemeData theme,
   ) {
-    final item = controller._currentDataset[index];
+    final item = controller._tableRow(index);
     final list = <Widget>[];
 
     for (int i = 0; i < fixedColumnCount; i++) {
@@ -117,7 +117,7 @@ class _VariablePartRow<K extends Comparable<K>, T> extends _RowBuilder<K, T> {
     PagedDataTableController<K, T> controller,
     PagedDataTableThemeData theme,
   ) {
-    final item = controller._currentDataset[index];
+    final item = controller._tableRow(index);
     final list = <Widget>[];
 
     for (int i = fixedColumnCount; i < columns.length; i++) {
