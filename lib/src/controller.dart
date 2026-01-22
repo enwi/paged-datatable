@@ -17,9 +17,9 @@ final class PagedDataTableController<K extends Comparable<K>, T> extends FilterB
   // the current dataset that is being displayed
   final List<T> _currentDataset = [];
   T _tableRow(int index) {
-    if (_configuration?.reverse ?? false) {
-      return _currentDataset[_currentDataset.length - 1 - index];
-    }
+    // if (_configuration?.reverse ?? false) {
+    //   return _currentDataset[_currentDataset.length - 1 - index];
+    // }
     return _currentDataset[index];
   }
 
