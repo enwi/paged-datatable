@@ -208,6 +208,9 @@ final class LargeTextTableColumn<K extends Comparable<K>, T> extends EditableTab
   /// When false, the cell will be read-only and double-clicking will not open the editor.
   final bool editable;
 
+  /// Whether the text should be selectable
+  final bool selectable;
+
   const LargeTextTableColumn({
     required super.title,
     super.id,
@@ -227,6 +230,7 @@ final class LargeTextTableColumn<K extends Comparable<K>, T> extends EditableTab
     this.bottomSheetBreakpoint = 1000,
     this.wrapText = false,
     this.editable = true,
+    this.selectable = false,
   });
 
   @override
@@ -269,6 +273,7 @@ final class LargeTextTableColumn<K extends Comparable<K>, T> extends EditableTab
     bottomSheetBreakpoint: bottomSheetBreakpoint,
     wrapText: wrapText,
     editable: editable,
+    selectable: selectable,
   );
 }
 

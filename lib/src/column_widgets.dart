@@ -243,6 +243,7 @@ final class _LargeTextFieldCell<T> extends StatefulWidget {
   final double bottomSheetBreakpoint;
   final bool wrapText;
   final bool editable;
+  final bool selectable;
 
   const _LargeTextFieldCell({
     required this.getter,
@@ -260,6 +261,7 @@ final class _LargeTextFieldCell<T> extends StatefulWidget {
     required this.bottomSheetBreakpoint,
     this.wrapText = false,
     this.editable = true,
+    this.selectable = false,
     super.key,
   });
 
@@ -371,25 +373,33 @@ final class _LargeTextFieldCellState<T> extends State<_LargeTextFieldCell<T>> {
                         constraints:
                             widget.tooltipConstraints ??
                             BoxConstraints(maxWidth: MediaQuery.of(context).size.width / 2),
-                        child: Text(textController.text, style: widget.tooltipStyle),
+                        child: _textWidget(textController.text, style: widget.tooltipStyle),
                       ),
                     ),
                     child: widget.wrapText
-                        ? Text(
+                        ? _textWidget(
                             textController.text,
                             softWrap: true,
                             style: DefaultTextStyle.of(context).style.copyWith(overflow: TextOverflow.visible),
                           )
-                        : Text(textController.text, overflow: TextOverflow.ellipsis),
+                        : _textWidget(textController.text, overflow: TextOverflow.ellipsis),
                   )
                 : widget.wrapText
-                ? Text(
+                ? _textWidget(
                     textController.text,
                     softWrap: true,
                     style: DefaultTextStyle.of(context).style.copyWith(overflow: TextOverflow.visible),
                   )
-                : Text(textController.text, overflow: TextOverflow.ellipsis)),
+                : _textWidget(textController.text, overflow: TextOverflow.ellipsis)),
     );
+  }
+
+  Widget _textWidget(String text, {bool? softWrap, TextStyle? style, TextOverflow? overflow}) {
+    final textWidget = Text(text, softWrap: softWrap, style: style, overflow: overflow);
+    if (widget.selectable) {
+      return SelectionArea(child: textWidget);
+    }
+    return textWidget;
   }
 
   @override
